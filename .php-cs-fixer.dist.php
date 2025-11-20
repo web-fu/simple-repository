@@ -7,9 +7,6 @@ $finder = (new PhpCsFixer\Finder())
 
 return (new PhpCsFixer\Config())
     ->setRules([
-        '@DoctrineAnnotation'                              => true,
-        '@PHP81Migration'                                  => true,
-        '@Symfony'                                         => true,
         'array_syntax'                                     => ['syntax' => 'short'],
         'backtick_to_shell_exec'                           => true,
         'binary_operator_spaces'                           => [
@@ -39,7 +36,7 @@ return (new PhpCsFixer\Config())
         'global_namespace_import'                          => ['import_classes' => true],
         'header_comment'                                   => [
             'comment_type' => 'PHPDoc',
-            'header'       => "This file is part of web-fu/proxy\n\n@copyright Web-Fu <info@web-fu.it>\n\nFor the full copyright and license information, please view the LICENSE\nfile that was distributed with this source code.",
+            'header'       => "This file is part of web-fu/simple-repository\n\n@copyright Web-Fu <info@web-fu.it>\n\nFor the full copyright and license information, please view the LICENSE\nfile that was distributed with this source code.",
         ],
         'heredoc_indentation'                              => true,
         'heredoc_to_nowdoc'                                => true,
