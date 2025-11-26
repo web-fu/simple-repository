@@ -96,7 +96,7 @@ return (new PhpCsFixer\Config())
         'string_implicit_backslashes'                      => true,
         'strict_param'                                     => true,
         'ternary_to_null_coalescing'                       => true,
-        'visibility_required'                              => true,
+        'modifier_keywords'                                => true,
         'void_return'                                      => true,
     ])
     ->setFinder($finder);
