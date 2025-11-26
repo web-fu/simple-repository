@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * This file is part of web-fu/proxy
+ * This file is part of web-fu/simple-repository
  *
  * @copyright Web-Fu <info@web-fu.it>
  *
@@ -17,7 +17,9 @@ interface RepositoryInterface
 {
     public function get($id);
 
-    public function search();
+    public function search(array $criteria = []): array;
+
+    public function count(array $criteria = []): int;
 
     public function save($entity);
 
