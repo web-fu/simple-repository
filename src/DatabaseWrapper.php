@@ -24,6 +24,8 @@ class DatabaseWrapper
     private PDO $connection;
     private PDOStatement $stmt;
 
+    private string $formattedQuery;
+
     public function __construct(
         PDO $connection
     ) {
@@ -33,15 +35,15 @@ class DatabaseWrapper
     /**
      * @throws RepositoryException
      */
-    public function query(string $sql, array $params = []): self
+    public function query(string $query, array $params = []): self
     {
-        $sql  = self::formatQuery($sql);
-        $data = self::formatData($sql, $params);
+        $this->formattedQuery = self::formatQuery($query);
+        $data                 = self::formatData($query, $params);
 
-        $stmt = $this->connection->prepare($sql);
+        $stmt = $this->connection->prepare($this->formattedQuery);
 
         if (!$stmt) {
-            throw new RepositoryException('Prepare Error in query '.$sql);
+            throw new RepositoryException('Prepare Error in query '.$query);
         }
 
         try {
@@ -52,12 +54,17 @@ class DatabaseWrapper
 
             $stmt->execute();
         } catch (Exception $e) {
-            throw new RepositoryException($e->getMessage().' in the query:'.$sql.' data:'.print_r($data, true), 500);
+            throw new RepositoryException($e->getMessage().' in the query:'.$query.' data:'.print_r($data, true), 500);
         }
 
         $this->stmt = $stmt;
 
         return $this;
+    }
+
+    public function getFormattedQuery(): string
+    {
+        return $this->formattedQuery;
     }
 
     /**
@@ -122,28 +129,28 @@ class DatabaseWrapper
         return (int) $this->connection->lastInsertId();
     }
 
-    protected static function formatQuery(string $sql): string
+    protected static function formatQuery(string $query): string
     {
-        preg_match_all('/:\w+/', $sql, $matches);
+        preg_match_all('/:\w+/', $query, $matches);
         $params = $matches[0];
 
         $result = '';
         foreach ($params as $param) {
-            $pos = (int) strpos($sql, $param);
-            $result .= substr($sql, 0, $pos);
+            $pos = (int) strpos($query, $param);
+            $result .= substr($query, 0, $pos);
             $result .= $param.'_'.substr_count($result, $param);
-            $sql = substr($sql, $pos + strlen($param));
+            $query = substr($query, $pos + strlen($param));
         }
 
-        return $result.$sql;
+        return $result.$query;
     }
 
     /**
      * @throws RepositoryException
      */
-    protected static function formatData(string $sql, array $params = []): array
+    protected static function formatData(string $query, array $params = []): array
     {
-        preg_match_all('/:\w+/', $sql, $neededParams);
+        preg_match_all('/:\w+/', $query, $neededParams);
         $neededParams = $neededParams[0];
 
         $data = [];
@@ -166,7 +173,7 @@ class DatabaseWrapper
         }
 
         if ($missingData = array_diff($neededParams, array_keys($data))) {
-            throw new RepositoryException('Missing Data to complete query:'.PHP_EOL.print_r($missingData, true).' SQL:'.$sql, 500);
+            throw new RepositoryException('Missing Data to complete query:'.PHP_EOL.print_r($missingData, true).' SQL:'.$query, 500);
         }
 
         return $data;
