@@ -8,6 +8,11 @@
             "WebFu\\SimpleRepository\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "WebFu\\SimpleRepository\\Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "Gabriele Manganello",
