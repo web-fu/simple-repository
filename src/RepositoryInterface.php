@@ -15,13 +15,34 @@ namespace WebFu\SimpleRepository;
 
 interface RepositoryInterface
 {
+    /**
+     * @param int|string $id
+     *
+     * @return object|array<string, mixed>|null
+     */
     public function get($id);
 
+    /**
+     * @param array<string, mixed> $criteria
+     *
+     * @return array<int, object|array<string, mixed>>
+     */
     public function search(array $criteria = []): array;
 
+    /**
+     * @param array<string, mixed> $criteria
+     */
     public function count(array $criteria = []): int;
 
-    public function save($entity);
+    /**
+     * @param object|array<string, mixed> $entity
+     *
+     */
+    public function save($entity): void;
 
-    public function delete($entity);
+    /**
+     * @param object|array<string, mixed> $entity
+     *
+     */
+    public function delete($entity): void;
 }

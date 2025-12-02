@@ -36,6 +36,9 @@ class DatabaseWrapperTest extends TestCase
         $this->assertEquals($expected, $databaseWrapper->getFormattedQuery());
     }
 
+    /**
+     * @return iterable<string, array{query: string, expected: string}>
+     */
     public function queryProvider(): iterable
     {
         yield 'select with where' => [

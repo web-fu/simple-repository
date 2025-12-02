@@ -33,6 +33,8 @@ class DatabaseWrapper
     }
 
     /**
+     * @param array<string, mixed> $params
+     *
      * @throws RepositoryException
      */
     public function query(string $query, array $params = []): self
@@ -75,13 +77,20 @@ class DatabaseWrapper
         return $this->stmt->fetch(PDO::FETCH_COLUMN);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getRow(): array
     {
+        /** @var array<string, mixed>|false  */
         $result = $this->stmt->fetch(PDO::FETCH_ASSOC);
 
         return $result ?: [];
     }
 
+    /**
+     * @return array<int, mixed>
+     */
     public function getColumn(): array
     {
         $result = $this->stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -89,6 +98,9 @@ class DatabaseWrapper
         return $result ?: [];
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function getTable(): array
     {
         $result = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -96,20 +108,31 @@ class DatabaseWrapper
         return $result ?: [];
     }
 
+    /**
+     * @return Iterator<array<string, mixed>>
+     */
     public function getTableIterator(): Iterator
     {
         while ($result = $this->stmt->fetch(PDO::FETCH_ASSOC)) {
+            /** @var array<string, mixed> $result */
             yield $result;
         }
     }
 
+    /**
+     * @return array<string, array<mixed>>
+     */
     public function getGroup(): array
     {
+        /** @var array<string, array<mixed>> $result */
         $result = $this->stmt->fetchAll(PDO::FETCH_GROUP);
 
         return $result ?: [];
     }
 
+    /**
+     * @return array<string, array<mixed>>
+     */
     public function getUniqueGroup(): array
     {
         $result = $this->stmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE);
@@ -117,6 +140,9 @@ class DatabaseWrapper
         return $result ?: [];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getKeyPair(): array
     {
         $result = $this->stmt->fetchAll(PDO::FETCH_KEY_PAIR);
@@ -146,7 +172,10 @@ class DatabaseWrapper
     }
 
     /**
+     * @param array<string, mixed> $params
+     *
      * @throws RepositoryException
+     * @return array<string, mixed>
      */
     protected static function formatData(string $query, array $params = []): array
     {
@@ -166,6 +195,7 @@ class DatabaseWrapper
 
         // Create a data binding
         foreach ($neededParams as $neededParam) {
+            /** @var string $key */
             $key = preg_replace('/_\d+$/', '', $neededParam);
             if (array_key_exists($key, $params)) {
                 $data[$neededParam] = $params[$key];
