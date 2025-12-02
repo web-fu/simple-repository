@@ -36,8 +36,12 @@ jobs:
       - name: Install dependencies
         run: composer update --ignore-platform-req=php --prefer-dist --no-progress --no-suggest
 
+      - name: Start DB service
+        run: |
+          sudo chmod 777 /var/run/mysqld
+
       - name: Run test.sql
-        run: mysql --protocol=tcp -h localhost --port 33306 -uroot -ppassword -e "$(cat $(find ./ -name test.sql))"
+        run: mysql --protocol=tcp -h localhost --port 33306 -uroot -ppassword < tests/data/test.sql
 
       - name: Run the tests
         run: composer run tests
