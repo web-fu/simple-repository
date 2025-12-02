@@ -9,6 +9,11 @@ on:
 jobs:
   run:
     runs-on: ${{ matrix.operating-system }}
+    services:
+      db:
+        image: mysql:8
+        ports:
+          - 33306:3306
     strategy:
       matrix:
         operating-system: [ubuntu-latest]
@@ -19,6 +24,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@master
+
       - name: Install PHP
         uses: shivammathur/setup-php@master
         with:
@@ -26,8 +32,13 @@ jobs:
           tools: 'composer:v2'
           ini-values: error_reporting=E_ALL
           extensions: mbstring
+
       - name: Install dependencies
         run: composer update --ignore-platform-req=php --prefer-dist --no-progress --no-suggest
+
+      - name: Run test.sql
+        run: mysql --protocol=tcp -h localhost --port 33306 -uroot -ppassword -e "$(cat $(find ./ -name test.sql))"
+
       - name: Run the tests
         run: composer run tests
 
