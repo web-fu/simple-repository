@@ -46,15 +46,19 @@ jobs:
       - name: Install dependencies
         run: composer update --ignore-platform-req=php --prefer-dist --no-progress --no-suggest
 
-      - name: Start MySQL
+      - name: Install MySQL client
+        run: sudo apt-get update && sudo apt-get install -y default-mysql-client
+
+      - name: Wait for MySQL to be ready
         run: |
-          sudo systemctl enable mysql.service
-          sudo systemctl start mysql.service
-          journalctl -xeu mysql.service
-          mysql -e 'CREATE DATABASE ${{ env.DB_NAME }};' -u${{ env.DB_USER }} -p${{ env.DB_PASS }}  
+          for i in {1..30}; do
+            mysqladmin ping -h127.0.0.1 -P3306 -u${{ env.DB_USER }} -p${{ env.DB_PASS }} >/dev/null 2>&1 && break
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
 
       - name: Run test.sql
-        run: mysql --protocol=tcp -h localhost --port 33306 -u${{ env.DB_USER }} -p${{ env.DB_PASS }} < tests/data/test.sql
+        run: mysql -h127.0.0.1 -P3306 -u${{ env.DB_USER }} -p${{ env.DB_PASS }} < tests/data/test.sql
 
       - name: Run the tests
         run: composer run tests
