@@ -14,10 +14,6 @@ jobs:
         image: mysql:8
         ports:
           - 33306:3306
-        env:
-          DB_DATABASE: test_db
-          DB_USER: root
-          DB_PASSWORD: root
     strategy:
       matrix:
         operating-system: [ubuntu-latest]
@@ -25,6 +21,10 @@ jobs:
         experimental: [false]
       fail-fast: false
     name: PHP ${{ matrix.php-versions }} @ ${{ matrix.operating-system }}
+    env:
+      DB_NAME: test_db
+      DB_USER: root
+      DB_PASS: root
     steps:
       - name: Checkout
         uses: actions/checkout@master
@@ -43,10 +43,10 @@ jobs:
       - name: Start MySQL
         run: |
           sudo /etc/init.d/mysql start
-          mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}  
+          mysql -e 'CREATE DATABASE ${{ env.DB_NAME }};' -u${{ env.DB_USER }} -p${{ env.DB_PASS }}  
 
       - name: Run test.sql
-        run: mysql --protocol=tcp -h localhost --port 33306 -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} < tests/data/test.sql
+        run: mysql --protocol=tcp -h localhost --port 33306 -u${{ env.DB_USER }} -p${{ env.DB_PASS }} < tests/data/test.sql
 
       - name: Run the tests
         run: composer run tests
