@@ -14,6 +14,10 @@ jobs:
         image: mysql:8
         ports:
           - 33306:3306
+        env:
+          DB_DATABASE: test_db
+          DB_USER: root
+          DB_PASSWORD: root
     strategy:
       matrix:
         operating-system: [ubuntu-latest]
@@ -36,12 +40,13 @@ jobs:
       - name: Install dependencies
         run: composer update --ignore-platform-req=php --prefer-dist --no-progress --no-suggest
 
-      - name: Start DB service
+      - name: Start MySQL
         run: |
-          sudo chmod 777 /var/run/mysqld
+          sudo /etc/init.d/mysql start
+          mysql -e "CREATE DATABASE IF NOT EXISTS $DB_DATABASE;" -u$DB_USER -p$DB_PASSWORD  
 
       - name: Run test.sql
-        run: mysql --protocol=tcp -h localhost --port 33306 -uroot -ppassword < tests/data/test.sql
+        run: mysql --protocol=tcp -h localhost --port 33306 -u$DB_USER -p$DB_PASSWORD < tests/data/test.sql
 
       - name: Run the tests
         run: composer run tests
