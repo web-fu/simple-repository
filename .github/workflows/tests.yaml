@@ -43,10 +43,10 @@ jobs:
       - name: Start MySQL
         run: |
           sudo /etc/init.d/mysql start
-          mysql -e "CREATE DATABASE IF NOT EXISTS $DB_DATABASE;" -u$DB_USER -p$DB_PASSWORD  
+          mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}  
 
       - name: Run test.sql
-        run: mysql --protocol=tcp -h localhost --port 33306 -u$DB_USER -p$DB_PASSWORD < tests/data/test.sql
+        run: mysql --protocol=tcp -h localhost --port 33306 -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} < tests/data/test.sql
 
       - name: Run the tests
         run: composer run tests
