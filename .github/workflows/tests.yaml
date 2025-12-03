@@ -13,7 +13,8 @@ jobs:
       db:
         image: mysql:8
         ports:
-          - 33306:3306
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     strategy:
       matrix:
         operating-system: [ubuntu-latest]
@@ -42,7 +43,7 @@ jobs:
 
       - name: Start MySQL
         run: |
-          sudo /etc/init.d/mysql start
+          sudo systemctl start mysql.service
           mysql -e 'CREATE DATABASE ${{ env.DB_NAME }};' -u${{ env.DB_USER }} -p${{ env.DB_PASS }}  
 
       - name: Run test.sql
