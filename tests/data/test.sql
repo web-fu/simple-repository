@@ -1,3 +1,5 @@
+CREATE DATABASE test_db;
+USE db_test;
 CREATE TABLE IF NOT EXISTS user (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
