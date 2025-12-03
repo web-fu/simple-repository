@@ -26,9 +26,7 @@ class DatabaseWrapperTest extends TestCase
      */
     public function testGetFormattedQuery(string $query, string $expected): void
     {
-        $pdo = $this->getMockBuilder(PDO::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $pdo = new PDO('sqlite::memory:');
 
         $databaseWrapper = new DatabaseWrapper($pdo);
         $databaseWrapper->query($query, ['id' => 1]);

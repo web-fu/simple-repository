@@ -45,7 +45,8 @@ class DatabaseWrapper
         $stmt = $this->connection->prepare($this->formattedQuery);
 
         if (!$stmt) {
-            throw new RepositoryException('Prepare Error in query '.$query);
+            $errorInfo = $this->connection->errorInfo();
+            throw new RepositoryException('Prepare Error: '.$errorInfo[2].' in the query:'.$query, $errorInfo[0]);
         }
 
         try {
