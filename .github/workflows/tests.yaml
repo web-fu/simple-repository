@@ -48,7 +48,7 @@ jobs:
 
       - name: Start MySQL
         run: |
-          sudo systemctl start mysql.service
+          sudo /etc/init.d/mysql start
           mysql -e 'CREATE DATABASE ${{ env.DB_NAME }};' -u${{ env.DB_USER }} -p${{ env.DB_PASS }}  
 
       - name: Run test.sql
