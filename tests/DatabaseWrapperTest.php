@@ -27,7 +27,7 @@ class DatabaseWrapperTest extends TestCase
     public function testGetFormattedQuery(string $query, string $expected): void
     {
         var_dump($_ENV);
-        $pdo = new PDO('mysql:host=localhost;dbname=test_db', 'user', 'password');
+        $pdo = new PDO('mysql:host=localhost;dbname='.$_ENV['DB_NAME'], $_ENV['DB_USER'], $_ENV['DB_PASS']);
 
         $databaseWrapper = new DatabaseWrapper($pdo);
         $databaseWrapper->query($query, ['id' => 1]);

@@ -17,9 +17,9 @@
         <server name="SYMFONY_PHPUNIT_VERSION" value="9.5" />
         <server name="KERNEL_CLASS" value="App\Kernel" />
 
-        <!-- ###+ nelmio/cors-bundle ### -->
-        <env name="CORS_ALLOW_ORIGIN" value="'^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'"/>
-        <!-- ###- nelmio/cors-bundle ### -->
+        <env name="DB_NAME" value="test_db"/>
+        <env name="DB_USER" value="test_user"/>
+        <env name="DB_PASS" value="test_password"/>
     </php>
 
     <testsuites>
