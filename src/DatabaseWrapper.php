@@ -171,12 +171,12 @@ class DatabaseWrapper
             $subQuery .= $param.'_'.substr_count($subQuery, $param);
             $query = substr($query, $pos + strlen($param));
 
-            if (!$data[$param]) {
+            if (!array_key_exists(substr($param, 1), $data)) {
                 $missingData[] = $param;
                 continue;
             }
 
-            $this->formattedData[$param.'_'.substr_count($subQuery, $param)] = $data[$param];
+            $this->formattedData[$param.'_'.substr_count($subQuery, $param)] = $data[substr($param, 1)];
         }
 
         $this->formattedQuery = $subQuery.$query;
