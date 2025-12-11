@@ -25,6 +25,10 @@ class DatabaseWrapper
     private PDOStatement $stmt;
 
     private string $formattedQuery;
+    /**
+     * @var array<string, mixed>
+     */
+    private array $formattedData = [];
 
     public function __construct(
         PDO $connection
@@ -39,25 +43,17 @@ class DatabaseWrapper
      */
     public function query(string $query, array $params = []): self
     {
-        $this->formattedQuery = self::formatQuery($query);
-        $data                 = self::formatData($query, $params);
-
-        $stmt = $this->connection->prepare($this->formattedQuery);
-
-        if (!$stmt) {
-            $errorInfo = $this->connection->errorInfo();
-            throw new RepositoryException('Prepare Error: '.$errorInfo[2].' in the query:'.$this->formattedQuery, $errorInfo[0]);
-        }
+        $stmt = $this->preparedQuery($query, $params);
 
         try {
-            foreach ($data as $key => $value) {
+            foreach ($this->formattedData as $key => $value) {
                 $type = self::getPdoType($value);
                 $stmt->bindValue($key, $value, $type);
             }
 
             $stmt->execute();
         } catch (Exception $e) {
-            throw new RepositoryException($e->getMessage().' in the query:'.$this->formattedQuery.' data:'.print_r($data, true), $e->getCode(), $e);
+            throw new RepositoryException($e->getMessage().' in the query:'.$this->formattedQuery.' data:'.print_r($this->formattedData, true), $e->getCode(), $e);
         }
 
         $this->stmt = $stmt;
@@ -156,20 +152,42 @@ class DatabaseWrapper
         return (int) $this->connection->lastInsertId();
     }
 
-    protected static function formatQuery(string $query): string
+    /**
+     * @param string $query
+     * @param array<string, mixed> $data
+     * @throws RepositoryException
+     * @return PDOStatement
+     */
+    protected function preparedQuery(string $query, array $data = []): PDOStatement
     {
         preg_match_all('/:\w+/', $query, $matches);
-        $params = $matches[0];
+        $neededParams = $matches[0];
 
-        $result = '';
-        foreach ($params as $param) {
-            $pos = (int) strpos($query, $param);
-            $result .= substr($query, 0, $pos);
-            $result .= $param.'_'.substr_count($result, $param);
-            $query = substr($query, $pos + strlen($param));
+        // Check if there are missing data
+        if ($missingData = array_diff($neededParams, array_keys($data))) {
+            throw new RepositoryException('Missing Data to complete query:'.PHP_EOL.print_r($missingData, true).' SQL:'.$query, 500);
         }
 
-        return $result.$query;
+        $subQuery = '';
+        foreach ($neededParams as $param) {
+            $pos = (int) strpos($query, $param);
+            $subQuery .= substr($query, 0, $pos);
+            $subQuery .= $param.'_'.substr_count($subQuery, $param);
+            $query = substr($query, $pos + strlen($param));
+
+            $this->formattedData[$param.'_'.substr_count($subQuery, $param)] = $data[preg_replace('/_\d+$/', '', $param)];
+        }
+
+        $this->formattedQuery = $subQuery.$query;
+
+        $stmt = $this->connection->prepare($this->formattedQuery);
+
+        if (!$stmt) {
+            $errorInfo = $this->connection->errorInfo();
+            throw new RepositoryException('Prepare Error: '.$errorInfo[2].' in the query:'.$this->formattedQuery, $errorInfo[0]);
+        }
+
+        return $stmt;
     }
 
     /**
