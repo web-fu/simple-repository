@@ -46,7 +46,7 @@ class DatabaseWrapper
 
         if (!$stmt) {
             $errorInfo = $this->connection->errorInfo();
-            throw new RepositoryException('Prepare Error: '.$errorInfo[2].' in the query:'.$query, $errorInfo[0]);
+            throw new RepositoryException('Prepare Error: '.$errorInfo[2].' in the query:'.$this->formattedQuery, $errorInfo[0]);
         }
 
         try {
@@ -57,7 +57,7 @@ class DatabaseWrapper
 
             $stmt->execute();
         } catch (Exception $e) {
-            throw new RepositoryException($e->getMessage().' in the query:'.$query.' data:'.print_r($data, true), 500);
+            throw new RepositoryException($e->getMessage().' in the query:'.$this->formattedQuery.' data:'.print_r($data, true), $e->getCode(), $e);
         }
 
         $this->stmt = $stmt;
