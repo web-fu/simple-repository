@@ -165,6 +165,8 @@ class DatabaseWrapper
 
         // Check if there are missing data
         if ($missingData = array_diff($neededParams, array_keys($data))) {
+            var_dump($neededParams);
+            var_dump(array_keys($data));
             throw new RepositoryException('Missing Data to complete query:'.PHP_EOL.print_r($missingData, true).' SQL:'.$query, 500);
         }
 
