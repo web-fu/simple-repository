@@ -164,7 +164,7 @@ class DatabaseWrapper
         $neededParams = $matches[0];
 
         $missingData = [];
-        $subQuery = '';
+        $subQuery    = '';
         foreach ($neededParams as $param) {
             $pos = (int) strpos($query, $param);
             $subQuery .= substr($query, 0, $pos);
@@ -176,7 +176,7 @@ class DatabaseWrapper
                 continue;
             }
 
-            $this->formattedData[$param.'_'.substr_count($subQuery, $param)] = $data[substr($param, 1)];
+            $this->formattedData[$param.'_'.(substr_count($subQuery, $param) - 1)] = $data[substr($param, 1)];
         }
 
         $this->formattedQuery = $subQuery.$query;
