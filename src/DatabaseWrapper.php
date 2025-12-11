@@ -163,13 +163,7 @@ class DatabaseWrapper
         preg_match_all('/:\w+/', $query, $matches);
         $neededParams = $matches[0];
 
-        // Check if there are missing data
-        if ($missingData = array_diff($neededParams, array_keys($data))) {
-            var_dump($neededParams);
-            var_dump(array_keys($data));
-            throw new RepositoryException('Missing Data to complete query:'.PHP_EOL.print_r($missingData, true).' SQL:'.$query, 500);
-        }
-
+        $missingData = [];
         $subQuery = '';
         foreach ($neededParams as $param) {
             $pos = (int) strpos($query, $param);
@@ -177,10 +171,20 @@ class DatabaseWrapper
             $subQuery .= $param.'_'.substr_count($subQuery, $param);
             $query = substr($query, $pos + strlen($param));
 
-            $this->formattedData[$param.'_'.substr_count($subQuery, $param)] = $data[preg_replace('/_\d+$/', '', $param)];
+            if (!$data[$param]) {
+                $missingData[] = $param;
+                continue;
+            }
+
+            $this->formattedData[$param.'_'.substr_count($subQuery, $param)] = $data[$param];
         }
 
         $this->formattedQuery = $subQuery.$query;
+
+        // Check if there are missing data
+        if ($missingData) {
+            throw new RepositoryException('Missing Data to complete query:'.PHP_EOL.print_r($missingData, true).' SQL:'.$query, 500);
+        }
 
         $stmt = $this->connection->prepare($this->formattedQuery);
 
