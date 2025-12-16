@@ -25,6 +25,9 @@ class Column
 
     private ?string $name;
     private string $type;
+    /**
+     * @var int|float|string|bool|mixed[]|null $default
+     */
     private $default;
     private bool $nullable;
     private ?int $length;
@@ -32,7 +35,7 @@ class Column
     /**
      * @param null|string $name
      * @param string $type
-     * @param mixed $default
+     * @param int|float|string|bool|mixed[]|null $default
      * @param bool $nullable
      * @param null|int $length
      */
@@ -43,6 +46,11 @@ class Column
         bool $nullable = false,
         ?int $length = null
     ) {
+        $this->name = $name;
+        $this->type = $type;
+        $this->default = $default;
+        $this->nullable = $nullable;
+        $this->length = $length;
     }
 
     public function getName(): ?string
