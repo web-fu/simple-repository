@@ -16,7 +16,7 @@ use WebFu\SimpleRepository\Model;
 
 $userClass = new class extends Model {
     /**
-     * @column(name="id", nullable=false)
+     * @column(name="user_id", nullable=false)
      */
     protected int $id;
     /**

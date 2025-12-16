@@ -27,7 +27,7 @@ class ModelTest extends TestCase
 
         $userClass = new class extends Model {
             /**
-             * @column(name="id", nullable=false)
+             * @column(name="user_id", nullable=false)
              */
             protected int $id;
             /**
@@ -90,7 +90,7 @@ class ModelTest extends TestCase
             'user_id' => 1,
             'name'    => 'John Doe',
             'email'   => 'john.doe@none.com'
-            ]);
+        ]);
 
         $this->assertEquals(1, $user->getId());
         $this->assertEquals('John Doe', $user->getName());
