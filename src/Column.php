@@ -23,6 +23,13 @@ class Column
     public const JSON     = 'json';
     public const DATETIME = 'datetime';
 
+    /**
+     * @param null|string $name
+     * @param string $type
+     * @param mixed $default
+     * @param bool $nullable
+     * @param null|int $length
+     */
     public function __construct(
         private null|string $name = null,
         private string $type = self::STRING,
@@ -41,6 +48,15 @@ class Column
     {
         return $this->type;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getDefault()
+    {
+        return $this->default;
+    }
+
     public function isNullable(): bool
     {
         return $this->nullable;

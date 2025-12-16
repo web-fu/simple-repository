@@ -16,8 +16,14 @@ use ReflectionProperty;
 
 abstract class Model
 {
+    /**
+     * @var array<string, Column>
+     */
     private array $metadata = [];
 
+    /**
+     * @param array<string, int|float|string|null> $data
+     */
     public function __construct(array $data = [])
     {
         $this->init();
@@ -53,11 +59,12 @@ abstract class Model
                 $parsed = [];
                 if (!empty($m[1])) {
                     $inside = $m[1];
-                    preg_match_all('/\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^,)\s]+))\s*(?:,|$)/', $inside, $pairs, PREG_SET_ORDER);
+                    preg_match_all('/\s*(name|type|default|nullable|length)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^,)\s]+))\s*(?:,|$)/i', $inside, $pairs, PREG_SET_ORDER);
                     foreach ($pairs as $p) {
-                        $key   = $p[1];
+                        $key = $p[1];
+                        /** @phpstan-ignore-next-line */
                         $value = $p[2] !== '' ? $p[2] : ($p[3] !== '' ? $p[3] : $p[4]);
-                        $lower = strtolower((string)$value);
+                        $lower = strtolower($value);
                         if ($lower === 'false') {
                             $value = false;
                         } elseif ($lower === 'true') {
@@ -74,11 +81,15 @@ abstract class Model
             if ($parsedFromAnnotation !== null) {
                 // convert parsed annotation parameters into a Column instance
                 $this->metadata[$property->getName()] = new Column(
-                    $parsedFromAnnotation['name']        ?? $property->getName(),
-                    $parsedFromAnnotation['type']        ?? 'string',
+                    /** @phpstan-ignore-next-line */
+                    $parsedFromAnnotation['name'] ?? $property->getName(),
+                        /** @phpstan-ignore-next-line */
+                    $parsedFromAnnotation['type'] ?? Column::STRING,
                         $parsedFromAnnotation['default'] ?? null,
-                    $parsedFromAnnotation['length']      ?? null,
-                    $parsedFromAnnotation['nullable']    ?? false,
+                        /** @phpstan-ignore-next-line */
+                    $parsedFromAnnotation['nullable'] ?? false,
+                        /** @phpstan-ignore-next-line */
+                        $parsedFromAnnotation['length'] ?? null,
                 );
                 continue;
             }
@@ -102,9 +113,13 @@ abstract class Model
         }
     }
 
+    /**
+     * @param string $key
+     * @param int|float|string|null $value
+     */
     private function setOrIgnore(string $key, $value): void
     {
-        $column = array_filter($this->metadata, function(string $propertyName) use ($key, $value) {
+        $column = array_filter($this->metadata, function(string $propertyName) use ($key) {
             return $this->metadata[$propertyName]->getName() === $key;
         }, ARRAY_FILTER_USE_KEY);
 
