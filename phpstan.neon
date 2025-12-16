@@ -1,5 +1,5 @@
 includes:
-    - .config/ignore-by-php-version.neon.php
+    - .config/ignore-by-php-version.php
 parameters:
     level: 9
     paths:
