@@ -23,6 +23,12 @@ class Column
     public const JSON     = 'json';
     public const DATETIME = 'datetime';
 
+    private ?string $name;
+    private string $type;
+    private $default;
+    private bool $nullable;
+    private ?int $length;
+
     /**
      * @param null|string $name
      * @param string $type
@@ -31,15 +37,15 @@ class Column
      * @param null|int $length
      */
     public function __construct(
-        private null|string $name = null,
-        private string $type = self::STRING,
-        private $default = null,
-        private bool $nullable = false,
-        private null|int $length = null,
+        ?string $name = null,
+        string $type = self::STRING,
+        $default = null,
+        bool $nullable = false,
+        ?int $length = null
     ) {
     }
 
-    public function getName(): null|string
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -61,7 +67,7 @@ class Column
     {
         return $this->nullable;
     }
-    public function getLength(): null|int
+    public function getLength(): ?int
     {
         return $this->length;
     }

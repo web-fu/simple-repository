@@ -84,7 +84,7 @@ abstract class Model
                     /** @phpstan-ignore-next-line */
                     $parsedFromAnnotation['name'] ?? $property->getName(),
                         /** @phpstan-ignore-next-line */
-                    $parsedFromAnnotation['type'] ?? Column::STRING,
+                    $parsedFromAnnotation['type']        ?? Column::STRING,
                         $parsedFromAnnotation['default'] ?? null,
                         /** @phpstan-ignore-next-line */
                     $parsedFromAnnotation['nullable'] ?? false,
