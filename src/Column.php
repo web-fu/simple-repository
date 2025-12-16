@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace WebFu\SimpleRepository;
 use Attribute;
 use DateTime;
+use WebFu\SimpleRepository\Exception\CastingException;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
 class Column
@@ -81,6 +82,12 @@ class Column
         return $this->length;
     }
 
+    /**
+     * @param string $type
+     * @param mixed $value
+     *
+     * @return mixed
+     */
     public static function castValue(string $type, $value)
     {
         if ($value === null) {
@@ -89,16 +96,38 @@ class Column
 
         switch ($type) {
             case self::INTEGER:
+                if (!is_int($value)) {
+                    throw new CastingException('Integer value must be an integer.');
+                }
                 return (int)$value;
             case self::FLOAT:
+                if(!is_float($value) && !is_int($value)) {
+                    throw new CastingException('Float value must be a float or an integer.');
+                }
                 return (float)$value;
             case self::BOOLEAN:
+                if (!is_bool($value) && !is_int($value)) {
+                    throw new CastingException('Boolean value must be a boolean or an integer.');
+                }
                 return (bool)$value;
             case self::JSON:
-                return is_string($value) ? json_decode($value, true) : $value;
+                if (!is_string($value)) {
+                    throw new CastingException('JSON value must be a string.');
+                }
+                $casted = json_decode($value, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw new CastingException('Invalid JSON string: '.json_last_error_msg());
+                }
+                return $casted;
             case self::DATETIME:
-                return $value instanceof DateTime ? $value : new DateTime($value);
+                if (!is_string($value) && !($value instanceof DateTime)) {
+                    throw new CastingException('DateTime value must be a string or a DateTime instance.');
+                }
+                return $value instanceof DateTime ? $value : new DateTime((string) $value);
             default:
+                if (!is_string($value) && !is_numeric($value) && !is_bool($value)) {
+                    throw new CastingException('String value must be a string, a numeric or a boolean.');
+                }
                 return (string)$value;
         }
     }
