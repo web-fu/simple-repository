@@ -17,11 +17,12 @@ use PHPUnit\Framework\TestCase;
 use WebFu\SimpleRepository\DatabaseWrapper;
 
 /**
- * @coversNothing
+ * @coversDefaultClass \WebFu\SimpleRepository\DatabaseWrapper
  */
 class DatabaseWrapperTest extends TestCase
 {
     /**
+     * @covers ::getFormattedQuery
      * @dataProvider queryProvider
      */
     public function testGetFormattedQuery(string $query, string $expected): void
