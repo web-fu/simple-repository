@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace WebFu\SimpleRepository;
 use Attribute;
+use DateTime;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
 class Column
@@ -78,5 +79,27 @@ class Column
     public function getLength(): ?int
     {
         return $this->length;
+    }
+
+    public static function castValue(string $type, $value)
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        switch ($type) {
+            case self::INTEGER:
+                return (int)$value;
+            case self::FLOAT:
+                return (float)$value;
+            case self::BOOLEAN:
+                return (bool)$value;
+            case self::JSON:
+                return is_string($value) ? json_decode($value, true) : $value;
+            case self::DATETIME:
+                return $value instanceof DateTime ? $value : new DateTime($value);
+            default:
+                return (string)$value;
+        }
     }
 }

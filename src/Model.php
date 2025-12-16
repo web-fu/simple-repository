@@ -127,11 +127,13 @@ abstract class Model
             return;
         }
 
+        $castedValue = Column::castValue($column[array_key_first($column)]->getType(), $value);
+
         $propertyName = array_key_first($column);
 
         $property = new ReflectionProperty(get_class($this), $propertyName);
         $property->setAccessible(true);
-        $property->setValue($this, $value);
+        $property->setValue($this, $castedValue);
         $property->setAccessible(false);
     }
 }
