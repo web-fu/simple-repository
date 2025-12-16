@@ -2,7 +2,7 @@
 
 $includes = [];
 if (PHP_VERSION_ID < 80000) {
-
+    $includes[] = __DIR__ . '/reflection-property-getAttributes.neon';
 }
 
 $config = [];
