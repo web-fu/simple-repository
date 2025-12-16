@@ -3,6 +3,7 @@
 $finder = (new PhpCsFixer\Finder())
     ->in(__DIR__.'/src')
     ->in(__DIR__.'/tests')
+    ->in(__DIR__.'/examples')
 ;
 
 return (new PhpCsFixer\Config())
@@ -22,7 +23,7 @@ return (new PhpCsFixer\Config())
         'combine_consecutive_unsets'                       => true,
         'combine_nested_dirname'                           => true,
         'comment_to_phpdoc'                                => true,
-        'nullable_type_declaration'                        => ['syntax' => 'union'],
+        'nullable_type_declaration'                        => ['syntax' => 'question_mark'],
         'compact_nullable_type_declaration'                => true,
         'declare_strict_types'                             => true,
         'dir_constant'                                     => true,
