@@ -46,11 +46,11 @@ class Column
         bool $nullable = false,
         ?int $length = null
     ) {
-        $this->name = $name;
-        $this->type = $type;
-        $this->default = $default;
+        $this->name     = $name;
+        $this->type     = $type;
+        $this->default  = $default;
         $this->nullable = $nullable;
-        $this->length = $length;
+        $this->length   = $length;
     }
 
     public function getName(): ?string
