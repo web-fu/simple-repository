@@ -11,9 +11,8 @@ declare(strict_types=1);
  */
 
 namespace WebFu\SimpleRepository\Exception;
-use Exception;
 
-class CastingException extends Exception
+class CastingException extends \Exception
 {
 
 }

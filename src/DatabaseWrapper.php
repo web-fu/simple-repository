@@ -13,16 +13,12 @@ declare(strict_types=1);
 
 namespace WebFu\SimpleRepository;
 
-use Exception;
-use Iterator;
-use PDO;
-use PDOStatement;
 use WebFu\SimpleRepository\Exception\RepositoryException;
 
 class DatabaseWrapper
 {
-    private PDO $connection;
-    private PDOStatement $stmt;
+    private \PDO $connection;
+    private \PDOStatement $stmt;
 
     private string $formattedQuery;
     /**
@@ -31,7 +27,7 @@ class DatabaseWrapper
     private array $formattedData = [];
 
     public function __construct(
-        PDO $connection
+        \PDO $connection
     ) {
         $this->connection = $connection;
     }
@@ -52,7 +48,7 @@ class DatabaseWrapper
             }
 
             $stmt->execute();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             throw new RepositoryException($e->getMessage().' in the query:'.$this->formattedQuery.' data:'.print_r($this->formattedData, true), $e->getCode(), $e);
         }
 
@@ -71,7 +67,7 @@ class DatabaseWrapper
      */
     public function getValue()
     {
-        return $this->stmt->fetch(PDO::FETCH_COLUMN);
+        return $this->stmt->fetch(\PDO::FETCH_COLUMN);
     }
 
     /**
@@ -80,7 +76,7 @@ class DatabaseWrapper
     public function getRow(): array
     {
         /** @var array<string, mixed>|false  */
-        $result = $this->stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $this->stmt->fetch(\PDO::FETCH_ASSOC);
 
         return $result ?: [];
     }
@@ -90,7 +86,7 @@ class DatabaseWrapper
      */
     public function getColumn(): array
     {
-        $result = $this->stmt->fetchAll(PDO::FETCH_COLUMN);
+        $result = $this->stmt->fetchAll(\PDO::FETCH_COLUMN);
 
         return $result ?: [];
     }
@@ -100,17 +96,17 @@ class DatabaseWrapper
      */
     public function getTable(): array
     {
-        $result = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+        $result = $this->stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         return $result ?: [];
     }
 
     /**
-     * @return Iterator<array<string, mixed>>
+     * @return \Iterator<array<string, mixed>>
      */
-    public function getTableIterator(): Iterator
+    public function getTableIterator(): \Iterator
     {
-        while ($result = $this->stmt->fetch(PDO::FETCH_ASSOC)) {
+        while ($result = $this->stmt->fetch(\PDO::FETCH_ASSOC)) {
             /** @var array<string, mixed> $result */
             yield $result;
         }
@@ -122,7 +118,7 @@ class DatabaseWrapper
     public function getGroup(): array
     {
         /** @var array<string, array<mixed>> $result */
-        $result = $this->stmt->fetchAll(PDO::FETCH_GROUP);
+        $result = $this->stmt->fetchAll(\PDO::FETCH_GROUP);
 
         return $result ?: [];
     }
@@ -132,7 +128,7 @@ class DatabaseWrapper
      */
     public function getUniqueGroup(): array
     {
-        $result = $this->stmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE);
+        $result = $this->stmt->fetchAll(\PDO::FETCH_GROUP | \PDO::FETCH_UNIQUE);
 
         return $result ?: [];
     }
@@ -142,7 +138,7 @@ class DatabaseWrapper
      */
     public function getKeyPair(): array
     {
-        $result = $this->stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+        $result = $this->stmt->fetchAll(\PDO::FETCH_KEY_PAIR);
 
         return $result ?: [];
     }
@@ -156,9 +152,9 @@ class DatabaseWrapper
      * @param string $query
      * @param array<string, mixed> $data
      * @throws RepositoryException
-     * @return PDOStatement
+     * @return \PDOStatement
      */
-    protected function preparedQuery(string $query, array $data = []): PDOStatement
+    protected function preparedQuery(string $query, array $data = []): \PDOStatement
     {
         preg_match_all('/:\w+/', $query, $matches);
         $neededParams = $matches[0];
@@ -241,13 +237,13 @@ class DatabaseWrapper
     {
         switch (gettype($value)) {
             case 'boolean':
-                return PDO::PARAM_BOOL;
+                return \PDO::PARAM_BOOL;
             case 'integer':
-                return PDO::PARAM_INT;
+                return \PDO::PARAM_INT;
             case 'NULL':
-                return PDO::PARAM_NULL;
+                return \PDO::PARAM_NULL;
             default:
-                return PDO::PARAM_STR;
+                return \PDO::PARAM_STR;
         }
     }
 }

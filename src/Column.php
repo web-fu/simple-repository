@@ -11,11 +11,9 @@ declare(strict_types=1);
  */
 
 namespace WebFu\SimpleRepository;
-use Attribute;
-use DateTime;
 use WebFu\SimpleRepository\Exception\CastingException;
 
-#[Attribute(Attribute::TARGET_PROPERTY)]
+#[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Column
 {
     public const INTEGER  = 'integer';
@@ -120,10 +118,10 @@ class Column
                 }
                 return $casted;
             case self::DATETIME:
-                if (!is_string($value) && !($value instanceof DateTime)) {
+                if (!is_string($value) && !($value instanceof \DateTime)) {
                     throw new CastingException('DateTime value must be a string or a DateTime instance.');
                 }
-                return $value instanceof DateTime ? $value : new DateTime((string) $value);
+                return $value instanceof \DateTime ? $value : new \DateTime((string) $value);
             default:
                 if (!is_string($value) && !is_numeric($value) && !is_bool($value)) {
                     throw new CastingException('String value must be a string, a numeric or a boolean.');

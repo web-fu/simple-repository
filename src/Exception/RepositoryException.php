@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace WebFu\SimpleRepository\Exception;
 
-use Exception;
-
-class RepositoryException extends Exception
+class RepositoryException extends \Exception
 {
 }

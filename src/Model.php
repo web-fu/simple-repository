@@ -11,11 +11,8 @@ declare(strict_types=1);
  */
 
 namespace WebFu\SimpleRepository;
-use JsonSerializable;
-use ReflectionClass;
-use ReflectionProperty;
 
-abstract class Model implements JsonSerializable
+abstract class Model implements \JsonSerializable
 {
     /**
      * @var array<string, Column>
@@ -34,10 +31,11 @@ abstract class Model implements JsonSerializable
         }
     }
 
+    #[\ReturnTypeWillChange]
     public function jsonSerialize() {
         $result = [];
         foreach ($this->metadata as $propertyName => $column) {
-            $property                   = new ReflectionProperty(get_class($this), $propertyName);
+            $property = new \ReflectionProperty(get_class($this), $propertyName);
             $property->setAccessible(true);
             $result[$column->getName()] = $property->getValue($this);
             $property->setAccessible(false);
@@ -46,7 +44,7 @@ abstract class Model implements JsonSerializable
     }
 
     private function init(): void {
-        $reflection = new ReflectionClass($this);
+        $reflection = new \ReflectionClass($this);
         $properties = $reflection->getProperties();
         foreach ($properties as $property) {
             /** @var string $docComment */
@@ -143,7 +141,7 @@ abstract class Model implements JsonSerializable
 
         $propertyName = array_key_first($column);
 
-        $property = new ReflectionProperty(get_class($this), $propertyName);
+        $property = new \ReflectionProperty(get_class($this), $propertyName);
         $property->setAccessible(true);
         $property->setValue($this, $castedValue);
         $property->setAccessible(false);
