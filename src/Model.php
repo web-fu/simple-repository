@@ -11,10 +11,11 @@ declare(strict_types=1);
  */
 
 namespace WebFu\SimpleRepository;
+use JsonSerializable;
 use ReflectionClass;
 use ReflectionProperty;
 
-abstract class Model
+abstract class Model implements JsonSerializable
 {
     /**
      * @var array<string, Column>
@@ -31,6 +32,17 @@ abstract class Model
         foreach ($data as $key => $value) {
             $this->setOrIgnore($key, $value);
         }
+    }
+
+    public function jsonSerialize() {
+        $result = [];
+        foreach ($this->metadata as $propertyName => $column) {
+            $property                   = new ReflectionProperty(get_class($this), $propertyName);
+            $property->setAccessible(true);
+            $result[$column->getName()] = $property->getValue($this);
+            $property->setAccessible(false);
+        }
+        return $result;
     }
 
     private function init(): void {

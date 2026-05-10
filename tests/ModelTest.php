@@ -96,4 +96,45 @@ class ModelTest extends TestCase
         $this->assertEquals('John Doe', $user->getName());
         $this->assertEquals('john.doe@none.com', $user->getEmail());
     }
+
+    public function testJsonSerialize(): void
+    {
+        $userClass = new class extends Model {
+            /**
+             * @column(name="user_id", nullable=false)
+             */
+            protected int $id;
+            /**
+             * @column(name="name", nullable=false, length=100)
+             */
+            protected string $name;
+            /**
+             * @column(name="email", nullable=false, length=150)
+             */
+            protected string $email;
+
+            public function getId():int {
+                return $this->id;
+            }
+            public function getName():string {
+                return $this->name;
+            }
+            public function getEmail():string {
+                return $this->email;
+            }
+        };
+
+
+        $user = new $userClass([
+            'user_id' => 1,
+            'name'    => 'John Doe',
+            'email'   => 'john.doe@none.com'
+        ]);
+
+        $this->assertEquals([
+            'user_id' => 1,
+            'name'    => 'John Doe',
+            'email'   => 'john.doe@none.com',
+        ], $user->jsonSerialize());
+    }
 }
