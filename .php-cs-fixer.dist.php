@@ -34,7 +34,7 @@ return (new PhpCsFixer\Config())
         'self_static_accessor'                             => true,
         'fully_qualified_strict_types'                     => true,
         'general_phpdoc_annotation_remove'                 => ['annotations'=>['author']],
-        'global_namespace_import'                          => ['import_classes' => true],
+        'global_namespace_import'                          => ['import_classes' => false],
         'header_comment'                                   => [
             'comment_type' => 'PHPDoc',
             'header'       => "This file is part of web-fu/simple-repository\n\n@copyright Web-Fu <info@web-fu.it>\n\nFor the full copyright and license information, please view the LICENSE\nfile that was distributed with this source code.",

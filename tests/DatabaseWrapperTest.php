@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 namespace WebFu\SimpleRepository\Tests;
 
-use PDO;
 use PHPUnit\Framework\TestCase;
 use WebFu\SimpleRepository\DatabaseWrapper;
 
@@ -27,7 +26,7 @@ class DatabaseWrapperTest extends TestCase
      */
     public function testGetFormattedQuery(string $query, string $expected): void
     {
-        $pdo = new PDO('mysql:host=127.0.0.1;dbname='.$_ENV['DB_NAME'], $_ENV['DB_USER'], $_ENV['DB_PASS']);
+        $pdo = new \PDO('mysql:host=127.0.0.1;dbname='.$_ENV['DB_NAME'], $_ENV['DB_USER'], $_ENV['DB_PASS']);
 
         $databaseWrapper = new DatabaseWrapper($pdo);
         $databaseWrapper->query($query, ['id' => 1]);
