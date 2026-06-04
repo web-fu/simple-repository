@@ -69,11 +69,11 @@ class ModelTest extends TestCase
         }
 
         $userClass = new class extends Model {
-            #[\WebFu\SimpleRepository\Column(name: "user_id", nullable: false)]
+            #[Column(name: "user_id", nullable: false)]
             protected int $id;
-            #[\WebFu\SimpleRepository\Column(name: "name", nullable: false, length: 100)]
+            #[Column(name: "name", nullable: false, length: 100)]
             protected string $name;
-            #[\WebFu\SimpleRepository\Column(name: "email", nullable: false, length: 150)]
+            #[Column(name: "email", nullable: false, length: 150)]
             protected string $email;
 
             public function getId():int {
@@ -159,10 +159,9 @@ class ModelTest extends TestCase
 
         $this->assertInstanceOf(\DateTime::class, $event->getCreatedAt());
         $this->assertEquals('2026-06-04T10:11:12+00:00', $event->getCreatedAt()->format(DATE_ATOM));
-        $this->assertEquals(
-            '2026-06-04T10:11:12+00:00',
-            $event->jsonSerialize()['created_at']
-        );
+        $this->assertEquals([
+            'created_at' => '2026-06-04T10:11:12+00:00'
+        ], $event->jsonSerialize());
     }
 
     public function testModelDatetimeCustomFormatWithAnnotations(): void
@@ -184,7 +183,9 @@ class ModelTest extends TestCase
         ]);
 
         $this->assertInstanceOf(\DateTime::class, $event->getCreatedAt());
-        $this->assertEquals('2026-06-04', $event->jsonSerialize()['created_at']);
+        $this->assertEquals([
+            'created_at' => '2026-06-04'
+        ], $event->jsonSerialize());
     }
 
     public function testModelDatetimeWithAttributes(): void
@@ -204,12 +205,14 @@ class ModelTest extends TestCase
         };
 
         $dateTime = new \DateTime('2026-06-04 10:11:12');
-        $event = new $eventClass([
+        $event    = new $eventClass([
             'created_at' => $dateTime,
         ]);
 
         $this->assertSame($dateTime, $event->getCreatedAt());
-        $this->assertEquals('2026-06-04T10:11:12+00:00', $event->jsonSerialize()['created_at']);
+        $this->assertEquals([
+            'created_at' => '2026-06-04T10:11:12+00:00'
+        ], $event->jsonSerialize());
     }
 
     public function testModelDatetimeCustomFormatWithAttributes(): void
@@ -233,7 +236,9 @@ class ModelTest extends TestCase
         ]);
 
         $this->assertInstanceOf(\DateTime::class, $event->getCreatedAt());
-        $this->assertEquals('2026-06-04', $event->jsonSerialize()['created_at']);
+        $this->assertEquals([
+            'created_at' => '2026-06-04'
+        ], $event->jsonSerialize());
     }
 
     public function testModelDatetimeImmutableWithAnnotations(): void
@@ -256,7 +261,9 @@ class ModelTest extends TestCase
 
         $this->assertInstanceOf(\DateTimeImmutable::class, $event->getCreatedAt());
         $this->assertEquals('2026-06-04T10:11:12+00:00', $event->getCreatedAt()->format(DATE_ATOM));
-        $this->assertEquals('2026-06-04T10:11:12+00:00', $event->jsonSerialize()['created_at']);
+        $this->assertEquals([
+            'created_at' => '2026-06-04T10:11:12+00:00'
+        ], $event->jsonSerialize());
     }
 
     public function testModelDatetimeImmutableCustomFormatWithAnnotations(): void
@@ -278,7 +285,9 @@ class ModelTest extends TestCase
         ]);
 
         $this->assertInstanceOf(\DateTimeImmutable::class, $event->getCreatedAt());
-        $this->assertEquals('2026-06-04', $event->jsonSerialize()['created_at']);
+        $this->assertEquals([
+            'created_at' => '2026-06-04'
+        ], $event->jsonSerialize());
     }
 
     public function testModelDatetimeImmutableWithAttributes(): void
@@ -298,12 +307,14 @@ class ModelTest extends TestCase
         };
 
         $dateTime = new \DateTimeImmutable('2026-06-04T10:11:12+00:00');
-        $event = new $eventClass([
+        $event    = new $eventClass([
             'created_at' => $dateTime,
         ]);
 
         $this->assertSame($dateTime, $event->getCreatedAt());
-        $this->assertEquals('2026-06-04T10:11:12+00:00', $event->jsonSerialize()['created_at']);
+        $this->assertEquals([
+            'created_at' => '2026-06-04T10:11:12+00:00'
+        ], $event->jsonSerialize());
     }
 
     public function testModelDatetimeImmutableCustomFormatWithAttributes(): void
@@ -327,6 +338,8 @@ class ModelTest extends TestCase
         ]);
 
         $this->assertInstanceOf(\DateTimeImmutable::class, $event->getCreatedAt());
-        $this->assertEquals('2026-06-04', $event->jsonSerialize()['created_at']);
+        $this->assertEquals([
+            'created_at' => '2026-06-04'
+        ], $event->jsonSerialize());
     }
 }
