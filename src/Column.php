@@ -31,6 +31,7 @@ class Column
     private $default;
     private bool $nullable;
     private ?int $length;
+    private string $format;
 
     /**
      * @param null|string $name
@@ -38,19 +39,22 @@ class Column
      * @param int|float|string|bool|mixed[]|null $default
      * @param bool $nullable
      * @param null|int $length
+     * @param string $format Date format used when serialising a DATETIME column (default: DATE_ATOM)
      */
     public function __construct(
         ?string $name = null,
         string $type = self::STRING,
         $default = null,
         bool $nullable = false,
-        ?int $length = null
+        ?int $length = null,
+        string $format = DATE_ATOM
     ) {
         $this->name     = $name;
         $this->type     = $type;
         $this->default  = $default;
         $this->nullable = $nullable;
         $this->length   = $length;
+        $this->format   = $format;
     }
 
     public function getName(): ?string
@@ -78,6 +82,11 @@ class Column
     public function getLength(): ?int
     {
         return $this->length;
+    }
+
+    public function getFormat(): string
+    {
+        return $this->format;
     }
 
     /**

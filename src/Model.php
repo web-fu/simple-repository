@@ -20,7 +20,7 @@ abstract class Model implements \JsonSerializable
     private array $metadata = [];
 
     /**
-     * @param array<string, int|float|string|null> $data
+     * @param array<string, int|float|string|\DateTime|null> $data
      */
     public function __construct(array $data = [])
     {
@@ -37,7 +37,12 @@ abstract class Model implements \JsonSerializable
         foreach ($this->metadata as $propertyName => $column) {
             $property = new \ReflectionProperty(get_class($this), $propertyName);
             $property->setAccessible(true);
-            $result[$column->getName()] = $property->getValue($this);
+            $value = $property->getValue($this);
+            if ($column->getType() === Column::DATETIME && $value instanceof \DateTimeInterface) {
+                // Serialize using the column-level format (default DATE_ATOM).
+                $value = $value->format($column->getFormat());
+            }
+            $result[$column->getName()] = $value;
             $property->setAccessible(false);
         }
         return $result;
@@ -69,7 +74,7 @@ abstract class Model implements \JsonSerializable
                 $parsed = [];
                 if (!empty($m[1])) {
                     $inside = $m[1];
-                    preg_match_all('/\s*(name|type|default|nullable|length)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^,)\s]+))\s*(?:,|$)/i', $inside, $pairs, PREG_SET_ORDER);
+                    preg_match_all('/\s*(name|type|default|nullable|length|format)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^,)\s]+))\s*(?:,|$)/i', $inside, $pairs, PREG_SET_ORDER);
                     foreach ($pairs as $p) {
                         $key = $p[1];
                         /** @phpstan-ignore-next-line */
@@ -100,6 +105,8 @@ abstract class Model implements \JsonSerializable
                     $parsedFromAnnotation['nullable'] ?? false,
                         /** @phpstan-ignore-next-line */
                         $parsedFromAnnotation['length'] ?? null,
+                        /** @phpstan-ignore-next-line */
+                        $parsedFromAnnotation['format'] ?? DATE_ATOM,
                 );
                 continue;
             }
@@ -125,7 +132,7 @@ abstract class Model implements \JsonSerializable
 
     /**
      * @param string $key
-     * @param int|float|string|null $value
+     * @param int|float|string|\DateTime|null $value
      */
     private function setOrIgnore(string $key, $value): void
     {
