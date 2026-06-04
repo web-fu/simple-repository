@@ -16,12 +16,12 @@ use WebFu\SimpleRepository\Exception\CastingException;
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Column
 {
-    public const INTEGER  = 'integer';
-    public const STRING   = 'string';
-    public const FLOAT    = 'float';
-    public const BOOLEAN  = 'boolean';
-    public const JSON     = 'json';
-    public const DATETIME = 'datetime';
+    public const INTEGER            = 'integer';
+    public const STRING             = 'string';
+    public const FLOAT              = 'float';
+    public const BOOLEAN            = 'boolean';
+    public const JSON               = 'json';
+    public const DATETIME           = 'datetime';
     public const DATETIME_IMMUTABLE = 'datetime_immutable';
 
     private ?string $name;
