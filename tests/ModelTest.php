@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace WebFu\SimpleRepository\Tests;
 
 use PHPUnit\Framework\TestCase;
+use WebFu\SimpleRepository\Column;
 use WebFu\SimpleRepository\Model;
 
 /**
@@ -68,11 +69,11 @@ class ModelTest extends TestCase
         }
 
         $userClass = new class extends Model {
-            #[\WebFu\SimpleRepository\Column(name: "user_id", nullable: false)]
+            #[Column(name: "user_id", nullable: false)]
             protected int $id;
-            #[\WebFu\SimpleRepository\Column(name: "name", nullable: false, length: 100)]
+            #[Column(name: "name", nullable: false, length: 100)]
             protected string $name;
-            #[\WebFu\SimpleRepository\Column(name: "email", nullable: false, length: 150)]
+            #[Column(name: "email", nullable: false, length: 150)]
             protected string $email;
 
             public function getId():int {
@@ -136,5 +137,209 @@ class ModelTest extends TestCase
             'name'    => 'John Doe',
             'email'   => 'john.doe@none.com',
         ], $user->jsonSerialize());
+    }
+
+    public function testModelDatetimeWithAnnotations(): void
+    {
+        $eventClass = new class extends Model {
+            /**
+             * @column(name="created_at", type="datetime", nullable=false)
+             */
+            protected \DateTime $createdAt;
+
+            public function getCreatedAt(): \DateTime
+            {
+                return $this->createdAt;
+            }
+        };
+
+        $event = new $eventClass([
+            'created_at' => '2026-06-04 10:11:12',
+        ]);
+
+        $this->assertInstanceOf(\DateTime::class, $event->getCreatedAt());
+        $this->assertEquals('2026-06-04T10:11:12+00:00', $event->getCreatedAt()->format(DATE_ATOM));
+        $this->assertEquals([
+            'created_at' => '2026-06-04T10:11:12+00:00'
+        ], $event->jsonSerialize());
+    }
+
+    public function testModelDatetimeCustomFormatWithAnnotations(): void
+    {
+        $eventClass = new class extends Model {
+            /**
+             * @column(name="created_at", type="datetime", nullable=false, format="Y-m-d")
+             */
+            protected \DateTime $createdAt;
+
+            public function getCreatedAt(): \DateTime
+            {
+                return $this->createdAt;
+            }
+        };
+
+        $event = new $eventClass([
+            'created_at' => '2026-06-04T10:11:12+00:00',
+        ]);
+
+        $this->assertInstanceOf(\DateTime::class, $event->getCreatedAt());
+        $this->assertEquals([
+            'created_at' => '2026-06-04'
+        ], $event->jsonSerialize());
+    }
+
+    public function testModelDatetimeWithAttributes(): void
+    {
+        if (PHP_VERSION_ID < 80000) {
+            $this->markTestSkipped('Attributes are supported since PHP 8.0');
+        }
+
+        $eventClass = new class extends Model {
+            #[Column(name: 'created_at', type: Column::DATETIME, nullable: false)]
+            protected \DateTime $createdAt;
+
+            public function getCreatedAt(): \DateTime
+            {
+                return $this->createdAt;
+            }
+        };
+
+        $dateTime = new \DateTime('2026-06-04 10:11:12');
+        $event    = new $eventClass([
+            'created_at' => $dateTime,
+        ]);
+
+        $this->assertSame($dateTime, $event->getCreatedAt());
+        $this->assertEquals([
+            'created_at' => '2026-06-04T10:11:12+00:00'
+        ], $event->jsonSerialize());
+    }
+
+    public function testModelDatetimeCustomFormatWithAttributes(): void
+    {
+        if (PHP_VERSION_ID < 80000) {
+            $this->markTestSkipped('Attributes are supported since PHP 8.0');
+        }
+
+        $eventClass = new class extends Model {
+            #[Column(name: 'created_at', type: Column::DATETIME, nullable: false, format: 'Y-m-d')]
+            protected \DateTime $createdAt;
+
+            public function getCreatedAt(): \DateTime
+            {
+                return $this->createdAt;
+            }
+        };
+
+        $event = new $eventClass([
+            'created_at' => '2026-06-04T10:11:12+00:00',
+        ]);
+
+        $this->assertInstanceOf(\DateTime::class, $event->getCreatedAt());
+        $this->assertEquals([
+            'created_at' => '2026-06-04'
+        ], $event->jsonSerialize());
+    }
+
+    public function testModelDatetimeImmutableWithAnnotations(): void
+    {
+        $eventClass = new class extends Model {
+            /**
+             * @column(name="created_at", type="datetime_immutable", nullable=false)
+             */
+            protected \DateTimeImmutable $createdAt;
+
+            public function getCreatedAt(): \DateTimeImmutable
+            {
+                return $this->createdAt;
+            }
+        };
+
+        $event = new $eventClass([
+            'created_at' => '2026-06-04T10:11:12+00:00',
+        ]);
+
+        $this->assertInstanceOf(\DateTimeImmutable::class, $event->getCreatedAt());
+        $this->assertEquals('2026-06-04T10:11:12+00:00', $event->getCreatedAt()->format(DATE_ATOM));
+        $this->assertEquals([
+            'created_at' => '2026-06-04T10:11:12+00:00'
+        ], $event->jsonSerialize());
+    }
+
+    public function testModelDatetimeImmutableCustomFormatWithAnnotations(): void
+    {
+        $eventClass = new class extends Model {
+            /**
+             * @column(name="created_at", type="datetime_immutable", nullable=false, format="Y-m-d")
+             */
+            protected \DateTimeImmutable $createdAt;
+
+            public function getCreatedAt(): \DateTimeImmutable
+            {
+                return $this->createdAt;
+            }
+        };
+
+        $event = new $eventClass([
+            'created_at' => '2026-06-04T10:11:12+00:00',
+        ]);
+
+        $this->assertInstanceOf(\DateTimeImmutable::class, $event->getCreatedAt());
+        $this->assertEquals([
+            'created_at' => '2026-06-04'
+        ], $event->jsonSerialize());
+    }
+
+    public function testModelDatetimeImmutableWithAttributes(): void
+    {
+        if (PHP_VERSION_ID < 80000) {
+            $this->markTestSkipped('Attributes are supported since PHP 8.0');
+        }
+
+        $eventClass = new class extends Model {
+            #[Column(name: 'created_at', type: Column::DATETIME_IMMUTABLE, nullable: false)]
+            protected \DateTimeImmutable $createdAt;
+
+            public function getCreatedAt(): \DateTimeImmutable
+            {
+                return $this->createdAt;
+            }
+        };
+
+        $dateTime = new \DateTimeImmutable('2026-06-04T10:11:12+00:00');
+        $event    = new $eventClass([
+            'created_at' => $dateTime,
+        ]);
+
+        $this->assertSame($dateTime, $event->getCreatedAt());
+        $this->assertEquals([
+            'created_at' => '2026-06-04T10:11:12+00:00'
+        ], $event->jsonSerialize());
+    }
+
+    public function testModelDatetimeImmutableCustomFormatWithAttributes(): void
+    {
+        if (PHP_VERSION_ID < 80000) {
+            $this->markTestSkipped('Attributes are supported since PHP 8.0');
+        }
+
+        $eventClass = new class extends Model {
+            #[Column(name: 'created_at', type: Column::DATETIME_IMMUTABLE, nullable: false, format: 'Y-m-d')]
+            protected \DateTimeImmutable $createdAt;
+
+            public function getCreatedAt(): \DateTimeImmutable
+            {
+                return $this->createdAt;
+            }
+        };
+
+        $event = new $eventClass([
+            'created_at' => '2026-06-04T10:11:12+00:00',
+        ]);
+
+        $this->assertInstanceOf(\DateTimeImmutable::class, $event->getCreatedAt());
+        $this->assertEquals([
+            'created_at' => '2026-06-04'
+        ], $event->jsonSerialize());
     }
 }

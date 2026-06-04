@@ -16,12 +16,13 @@ use WebFu\SimpleRepository\Exception\CastingException;
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Column
 {
-    public const INTEGER  = 'integer';
-    public const STRING   = 'string';
-    public const FLOAT    = 'float';
-    public const BOOLEAN  = 'boolean';
-    public const JSON     = 'json';
-    public const DATETIME = 'datetime';
+    public const INTEGER            = 'integer';
+    public const STRING             = 'string';
+    public const FLOAT              = 'float';
+    public const BOOLEAN            = 'boolean';
+    public const JSON               = 'json';
+    public const DATETIME           = 'datetime';
+    public const DATETIME_IMMUTABLE = 'datetime_immutable';
 
     private ?string $name;
     private string $type;
@@ -31,6 +32,7 @@ class Column
     private $default;
     private bool $nullable;
     private ?int $length;
+    private string $format;
 
     /**
      * @param null|string $name
@@ -38,19 +40,22 @@ class Column
      * @param int|float|string|bool|mixed[]|null $default
      * @param bool $nullable
      * @param null|int $length
+     * @param string $format Date format used when serialising a DATETIME column (default: DATE_ATOM)
      */
     public function __construct(
         ?string $name = null,
         string $type = self::STRING,
         $default = null,
         bool $nullable = false,
-        ?int $length = null
+        ?int $length = null,
+        string $format = DATE_ATOM
     ) {
         $this->name     = $name;
         $this->type     = $type;
         $this->default  = $default;
         $this->nullable = $nullable;
         $this->length   = $length;
+        $this->format   = $format;
     }
 
     public function getName(): ?string
@@ -78,6 +83,11 @@ class Column
     public function getLength(): ?int
     {
         return $this->length;
+    }
+
+    public function getFormat(): string
+    {
+        return $this->format;
     }
 
     /**
@@ -122,6 +132,11 @@ class Column
                     throw new CastingException('DateTime value must be a string or a DateTime instance.');
                 }
                 return $value instanceof \DateTime ? $value : new \DateTime((string) $value);
+            case self::DATETIME_IMMUTABLE:
+                if (!is_string($value) && !($value instanceof \DateTimeImmutable)) {
+                    throw new CastingException('DateTimeImmutable value must be a string or a DateTimeImmutable instance.');
+                }
+                return $value instanceof \DateTimeImmutable ? $value : new \DateTimeImmutable((string) $value);
             default:
                 if (!is_string($value) && !is_numeric($value) && !is_bool($value)) {
                     throw new CastingException('String value must be a string, a numeric or a boolean.');
