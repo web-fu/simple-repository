@@ -20,7 +20,7 @@ abstract class Model implements \JsonSerializable
     private array $metadata = [];
 
     /**
-     * @param array<string, int|float|string|\DateTime|null> $data
+     * @param array<string, int|float|string|\DateTime|\DateTimeImmutable|null> $data
      */
     public function __construct(array $data = [])
     {
@@ -38,7 +38,10 @@ abstract class Model implements \JsonSerializable
             $property = new \ReflectionProperty(get_class($this), $propertyName);
             $property->setAccessible(true);
             $value = $property->getValue($this);
-            if ($column->getType() === Column::DATETIME && $value instanceof \DateTimeInterface) {
+            if (
+                ($column->getType() === Column::DATETIME || $column->getType() === Column::DATETIME_IMMUTABLE)
+                && $value instanceof \DateTimeInterface
+            ) {
                 // Serialize using the column-level format (default DATE_ATOM).
                 $value = $value->format($column->getFormat());
             }
@@ -132,7 +135,7 @@ abstract class Model implements \JsonSerializable
 
     /**
      * @param string $key
-     * @param int|float|string|\DateTime|null $value
+     * @param int|float|string|\DateTime|\DateTimeImmutable|null $value
      */
     private function setOrIgnore(string $key, $value): void
     {

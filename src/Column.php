@@ -22,6 +22,7 @@ class Column
     public const BOOLEAN  = 'boolean';
     public const JSON     = 'json';
     public const DATETIME = 'datetime';
+    public const DATETIME_IMMUTABLE = 'datetime_immutable';
 
     private ?string $name;
     private string $type;
@@ -131,6 +132,11 @@ class Column
                     throw new CastingException('DateTime value must be a string or a DateTime instance.');
                 }
                 return $value instanceof \DateTime ? $value : new \DateTime((string) $value);
+            case self::DATETIME_IMMUTABLE:
+                if (!is_string($value) && !($value instanceof \DateTimeImmutable)) {
+                    throw new CastingException('DateTimeImmutable value must be a string or a DateTimeImmutable instance.');
+                }
+                return $value instanceof \DateTimeImmutable ? $value : new \DateTimeImmutable((string) $value);
             default:
                 if (!is_string($value) && !is_numeric($value) && !is_bool($value)) {
                     throw new CastingException('String value must be a string, a numeric or a boolean.');
