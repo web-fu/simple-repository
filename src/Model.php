@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 namespace WebFu\SimpleRepository;
 
+use WebFu\SimpleRepository\Exception\CastingException;
+
 abstract class Model implements \JsonSerializable
 {
     /**
@@ -43,7 +45,8 @@ abstract class Model implements \JsonSerializable
                 && $value instanceof \DateTimeInterface
             ) {
                 // Serialize using the column-level format (default DATE_ATOM).
-                $value = $value->format($column->getFormat());
+                $format = $column->getFormat() === Column::AUTO ? DATE_ATOM : $column->getFormat();
+                $value  = $value->format($format);
             }
             $result[$column->getName()] = $value;
             $property->setAccessible(false);
@@ -102,7 +105,7 @@ abstract class Model implements \JsonSerializable
                     /** @phpstan-ignore-next-line */
                     $parsedFromAnnotation['name'] ?? $property->getName(),
                         /** @phpstan-ignore-next-line */
-                    $parsedFromAnnotation['type']        ?? Column::STRING,
+                    $parsedFromAnnotation['type']        ?? Column::AUTO,
                         $parsedFromAnnotation['default'] ?? null,
                         /** @phpstan-ignore-next-line */
                     $parsedFromAnnotation['nullable'] ?? false,
@@ -147,13 +150,87 @@ abstract class Model implements \JsonSerializable
             return;
         }
 
-        $castedValue = Column::castValue($column[array_key_first($column)]->getType(), $value);
-
-        $propertyName = array_key_first($column);
+        $propertyName     = array_key_first($column);
+        $columnDefinition = $column[$propertyName];
 
         $property = new \ReflectionProperty(get_class($this), $propertyName);
+
+        $castedValue = $this->castValueForProperty($columnDefinition, $property, $value);
+
         $property->setAccessible(true);
         $property->setValue($this, $castedValue);
         $property->setAccessible(false);
+    }
+
+    /**
+     * @param int|float|string|\DateTime|\DateTimeImmutable|null $value
+     * @return mixed
+     */
+    private function castValueForProperty(Column $column, \ReflectionProperty $property, $value)
+    {
+        if ($column->getType() !== Column::AUTO) {
+            return Column::castValue($column->getType(), $value);
+        }
+
+        if ($value === null) {
+            return null;
+        }
+
+        $propertyType = $property->getType();
+        if ($propertyType instanceof \ReflectionUnionType) {
+            foreach ($propertyType->getTypes() as $unionType) {
+                if ($unionType->getName() !== 'null') {
+                    $propertyType = $unionType;
+                    break;
+                }
+            }
+        }
+        if (!$propertyType instanceof \ReflectionNamedType) {
+            return $value;
+        }
+
+        $typeName = $propertyType->getName();
+        switch ($typeName) {
+            case 'int':
+                if (!is_numeric($value)) {
+                    throw new CastingException('AUTO cast failed: value cannot be cast to int.');
+                }
+                return (int)$value;
+            case 'float':
+                if (!is_numeric($value)) {
+                    throw new CastingException('AUTO cast failed: value cannot be cast to float.');
+                }
+                return (float)$value;
+            case 'bool':
+                if (is_bool($value)) {
+                    return $value;
+                }
+                if (is_int($value)) {
+                    return (bool)$value;
+                }
+                if (is_string($value)) {
+                    $casted = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                    if ($casted !== null) {
+                        return $casted;
+                    }
+                }
+                throw new CastingException('AUTO cast failed: value cannot be cast to bool.');
+            case 'string':
+                if (is_scalar($value)) {
+                    return (string)$value;
+                }
+                throw new CastingException('AUTO cast failed: value cannot be cast to string.');
+            case 'array':
+                if (is_array($value)) {
+                    return $value;
+                }
+                throw new CastingException('AUTO cast failed: value cannot be cast to array.');
+            case 'DateTime':
+                return Column::castValue(Column::DATETIME, $value);
+            case 'DateTimeImmutable':
+                return Column::castValue(Column::DATETIME_IMMUTABLE, $value);
+            default:
+                return $value;
+        }
     }
 }
