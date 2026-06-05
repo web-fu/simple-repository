@@ -16,6 +16,7 @@ use WebFu\SimpleRepository\Exception\CastingException;
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Column
 {
+    public const AUTO               = 'auto';
     public const INTEGER            = 'integer';
     public const STRING             = 'string';
     public const FLOAT              = 'float';
@@ -40,15 +41,15 @@ class Column
      * @param int|float|string|bool|mixed[]|null $default
      * @param bool $nullable
      * @param null|int $length
-     * @param string $format Date format used when serialising a DATETIME column (default: DATE_ATOM)
+     * @param string $format
      */
     public function __construct(
-        ?string $name = null,
-        string $type = self::STRING,
+        string $name,
+        string $type = self::AUTO,
         $default = null,
         bool $nullable = false,
         ?int $length = null,
-        string $format = DATE_ATOM
+        string $format = self::AUTO
     ) {
         $this->name     = $name;
         $this->type     = $type;

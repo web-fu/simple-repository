@@ -342,4 +342,116 @@ class ModelTest extends TestCase
             'created_at' => '2026-06-04'
         ], $event->jsonSerialize());
     }
+
+    public function testAutoTypeCastingWithAnnotations(): void
+    {
+        $userClass = new class extends Model {
+            /**
+             * @column(name="user_id", type="auto", nullable=false)
+             */
+            protected int $id;
+
+            /**
+             * @column(name="score", type="auto", nullable=false)
+             */
+            protected float $score;
+
+            /**
+             * @column(name="enabled", type="auto", nullable=false)
+             */
+            protected bool $enabled;
+
+            /**
+             * @column(name="created_at", type="auto", nullable=false)
+             */
+            protected \DateTimeImmutable $createdAt;
+
+            public function getId(): int
+            {
+                return $this->id;
+            }
+
+            public function getScore(): float
+            {
+                return $this->score;
+            }
+
+            public function isEnabled(): bool
+            {
+                return $this->enabled;
+            }
+
+            public function getCreatedAt(): \DateTimeImmutable
+            {
+                return $this->createdAt;
+            }
+        };
+
+        $user = new $userClass([
+            'user_id'    => '12',
+            'score'      => '98.7',
+            'enabled'    => 'true',
+            'created_at' => '2026-06-05T08:00:00+00:00',
+        ]);
+
+        $this->assertSame(12, $user->getId());
+        $this->assertEquals(98.7, $user->getScore());
+        $this->assertTrue($user->isEnabled());
+        $expectedCreatedAt = new \DateTimeImmutable('2026-06-05T08:00:00+00:00');
+        $this->assertEquals($expectedCreatedAt, $user->getCreatedAt());
+    }
+
+    public function testAutoTypeCastingWithAttributes(): void
+    {
+        if (PHP_VERSION_ID < 80000) {
+            $this->markTestSkipped('Attributes are supported since PHP 8.0');
+        }
+
+        $userClass = new class extends Model {
+            #[Column(name: 'user_id', type: Column::AUTO, nullable: false)]
+            protected int $id;
+
+            #[Column(name: 'score', type: Column::AUTO, nullable: false)]
+            protected float $score;
+
+            #[Column(name: 'enabled', type: Column::AUTO, nullable: false)]
+            protected bool $enabled;
+
+            #[Column(name: 'created_at', type: Column::AUTO, nullable: false)]
+            protected \DateTime $createdAt;
+
+            public function getId(): int
+            {
+                return $this->id;
+            }
+
+            public function getScore(): float
+            {
+                return $this->score;
+            }
+
+            public function isEnabled(): bool
+            {
+                return $this->enabled;
+            }
+
+            public function getCreatedAt(): \DateTime
+            {
+                return $this->createdAt;
+            }
+        };
+
+        $user = new $userClass([
+            'user_id'    => '7',
+            'score'      => 10,
+            'enabled'    => '0',
+            'created_at' => '2026-06-05T09:30:00+00:00',
+        ]);
+
+        $this->assertSame(7, $user->getId());
+        $this->assertSame(10.0, $user->getScore());
+        $this->assertFalse($user->isEnabled());
+        $expectedCreatedAt = new \DateTime('2026-06-05T09:30:00+00:00');
+        $this->assertEquals($expectedCreatedAt, $user->getCreatedAt());
+    }
 }
