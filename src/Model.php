@@ -44,9 +44,12 @@ abstract class Model implements \JsonSerializable
                 ($column->getType() === Column::DATETIME || $column->getType() === Column::DATETIME_IMMUTABLE)
                 && $value instanceof \DateTimeInterface
             ) {
-                // Serialize using the column-level format (default DATE_ATOM).
-                $format = $column->getFormat() === Column::AUTO ? DATE_ATOM : $column->getFormat();
-                $value  = $value->format($format);
+                // Serialize using the configured format, falling back to DATE_ATOM.
+                $format = $column->getFormat();
+                if ($format === null) {
+                    $format = DATE_ATOM;
+                }
+                $value = $value->format($format);
             }
             $result[$column->getName()] = $value;
             $property->setAccessible(false);
@@ -105,14 +108,14 @@ abstract class Model implements \JsonSerializable
                     /** @phpstan-ignore-next-line */
                     $parsedFromAnnotation['name'] ?? $property->getName(),
                         /** @phpstan-ignore-next-line */
-                    $parsedFromAnnotation['type']        ?? Column::AUTO,
+                    $parsedFromAnnotation['type']        ?? null,
                         $parsedFromAnnotation['default'] ?? null,
                         /** @phpstan-ignore-next-line */
                     $parsedFromAnnotation['nullable'] ?? false,
                         /** @phpstan-ignore-next-line */
                         $parsedFromAnnotation['length'] ?? null,
                         /** @phpstan-ignore-next-line */
-                        $parsedFromAnnotation['format'] ?? DATE_ATOM,
+                        $parsedFromAnnotation['format'] ?? null,
                 );
                 continue;
             }
@@ -168,12 +171,12 @@ abstract class Model implements \JsonSerializable
      */
     private function castValueForProperty(Column $column, \ReflectionProperty $property, $value)
     {
-        if ($column->getType() !== Column::AUTO) {
-            return Column::castValue($column->getType(), $value);
-        }
-
         if ($value === null) {
             return null;
+        }
+
+        if ($column->getType() !== null) {
+            return self::castValue($column->getType(), $value);
         }
 
         $propertyType = $property->getType();
@@ -190,6 +193,7 @@ abstract class Model implements \JsonSerializable
         }
 
         $typeName = $propertyType->getName();
+        var_dump($typeName);
         switch ($typeName) {
             case 'int':
                 if (!is_numeric($value)) {
@@ -226,11 +230,56 @@ abstract class Model implements \JsonSerializable
                 }
                 throw new CastingException('AUTO cast failed: value cannot be cast to array.');
             case 'DateTime':
-                return Column::castValue(Column::DATETIME, $value);
+                return self::castValue(Column::DATETIME, $value);
             case 'DateTimeImmutable':
-                return Column::castValue(Column::DATETIME_IMMUTABLE, $value);
+                return self::castValue(Column::DATETIME_IMMUTABLE, $value);
             default:
                 return $value;
+        }
+    }
+
+    private static function castValue(?string $type, $value)
+    {
+        switch ($type) {
+            case COLUMN::INTEGER:
+                if (!is_int($value)) {
+                    throw new CastingException('Integer value must be an integer.');
+                }
+                return (int)$value;
+            case COLUMN::FLOAT:
+                if(!is_float($value) && !is_int($value)) {
+                    throw new CastingException('Float value must be a float or an integer.');
+                }
+                return (float)$value;
+            case COLUMN::BOOLEAN:
+                if (!is_bool($value) && !is_int($value)) {
+                    throw new CastingException('Boolean value must be a boolean or an integer.');
+                }
+                return (bool)$value;
+            case COLUMN::JSON:
+                if (!is_string($value)) {
+                    throw new CastingException('JSON value must be a string.');
+                }
+                $casted = json_decode($value, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw new CastingException('Invalid JSON string: '.json_last_error_msg());
+                }
+                return $casted;
+            case COLUMN::DATETIME:
+                if (!is_string($value) && !($value instanceof \DateTime)) {
+                    throw new CastingException('DateTime value must be a string or a DateTime instance.');
+                }
+                return $value instanceof \DateTime ? $value : new \DateTime((string) $value);
+            case COLUMN::DATETIME_IMMUTABLE:
+                if (!is_string($value) && !($value instanceof \DateTimeImmutable)) {
+                    throw new CastingException('DateTimeImmutable value must be a string or a DateTimeImmutable instance.');
+                }
+                return $value instanceof \DateTimeImmutable ? $value : new \DateTimeImmutable((string) $value);
+            default:
+                if (!is_string($value) && !is_numeric($value) && !is_bool($value)) {
+                    throw new CastingException('String value must be a string, a numeric or a boolean.');
+                }
+                return (string)$value;
         }
     }
 }

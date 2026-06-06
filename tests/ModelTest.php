@@ -347,22 +347,22 @@ class ModelTest extends TestCase
     {
         $userClass = new class extends Model {
             /**
-             * @column(name="user_id", type="auto", nullable=false)
+             * @column(name="user_id")
              */
             protected int $id;
 
             /**
-             * @column(name="score", type="auto", nullable=false)
+             * @column(name="score")
              */
             protected float $score;
 
             /**
-             * @column(name="enabled", type="auto", nullable=false)
+             * @column(name="enabled")
              */
             protected bool $enabled;
 
             /**
-             * @column(name="created_at", type="auto", nullable=false)
+             * @column(name="created_at")
              */
             protected \DateTimeImmutable $createdAt;
 
@@ -408,16 +408,16 @@ class ModelTest extends TestCase
         }
 
         $userClass = new class extends Model {
-            #[Column(name: 'user_id', type: Column::AUTO, nullable: false)]
+            #[Column(name: 'user_id')]
             protected int $id;
 
-            #[Column(name: 'score', type: Column::AUTO, nullable: false)]
+            #[Column(name: 'score')]
             protected float $score;
 
-            #[Column(name: 'enabled', type: Column::AUTO, nullable: false)]
+            #[Column(name: 'enabled')]
             protected bool $enabled;
 
-            #[Column(name: 'created_at', type: Column::AUTO, nullable: false)]
+            #[Column(name: 'created_at')]
             protected \DateTime $createdAt;
 
             public function getId(): int
