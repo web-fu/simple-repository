@@ -16,6 +16,7 @@ use WebFu\SimpleRepository\Exception\CastingException;
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Column
 {
+    public const AUTO               = 'auto';
     public const INTEGER            = 'integer';
     public const STRING             = 'string';
     public const FLOAT              = 'float';
