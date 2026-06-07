@@ -193,7 +193,7 @@ abstract class Model implements \JsonSerializable
         }
 
         $typeName = $propertyType->getName();
-        var_dump($typeName);
+
         switch ($typeName) {
             case 'int':
                 if (!is_numeric($value)) {
