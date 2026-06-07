@@ -26,14 +26,14 @@ class Column
     public const DATETIME_IMMUTABLE = 'datetime_immutable';
 
     private ?string $name;
-    private string $type;
+    private ?string $type;
     /**
      * @var int|float|string|bool|mixed[]|null $default
      */
     private $default;
     private bool $nullable;
     private ?int $length;
-    private string $format;
+    private ?string $format;
 
     /**
      * @param null|string $name
@@ -45,11 +45,11 @@ class Column
      */
     public function __construct(
         string $name,
-        string $type = self::AUTO,
+        ?string $type = null,
         $default = null,
         bool $nullable = false,
         ?int $length = null,
-        string $format = self::AUTO
+        ?string $format = null
     ) {
         $this->name     = $name;
         $this->type     = $type;
@@ -59,12 +59,12 @@ class Column
         $this->format   = $format;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function getType(): string
+    public function getType(): ?string
     {
         return $this->type;
     }
@@ -86,63 +86,8 @@ class Column
         return $this->length;
     }
 
-    public function getFormat(): string
+    public function getFormat(): ?string
     {
         return $this->format;
-    }
-
-    /**
-     * @param string $type
-     * @param mixed $value
-     *
-     * @return mixed
-     */
-    public static function castValue(string $type, $value)
-    {
-        if ($value === null) {
-            return null;
-        }
-
-        switch ($type) {
-            case self::INTEGER:
-                if (!is_int($value)) {
-                    throw new CastingException('Integer value must be an integer.');
-                }
-                return (int)$value;
-            case self::FLOAT:
-                if(!is_float($value) && !is_int($value)) {
-                    throw new CastingException('Float value must be a float or an integer.');
-                }
-                return (float)$value;
-            case self::BOOLEAN:
-                if (!is_bool($value) && !is_int($value)) {
-                    throw new CastingException('Boolean value must be a boolean or an integer.');
-                }
-                return (bool)$value;
-            case self::JSON:
-                if (!is_string($value)) {
-                    throw new CastingException('JSON value must be a string.');
-                }
-                $casted = json_decode($value, true);
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    throw new CastingException('Invalid JSON string: '.json_last_error_msg());
-                }
-                return $casted;
-            case self::DATETIME:
-                if (!is_string($value) && !($value instanceof \DateTime)) {
-                    throw new CastingException('DateTime value must be a string or a DateTime instance.');
-                }
-                return $value instanceof \DateTime ? $value : new \DateTime((string) $value);
-            case self::DATETIME_IMMUTABLE:
-                if (!is_string($value) && !($value instanceof \DateTimeImmutable)) {
-                    throw new CastingException('DateTimeImmutable value must be a string or a DateTimeImmutable instance.');
-                }
-                return $value instanceof \DateTimeImmutable ? $value : new \DateTimeImmutable((string) $value);
-            default:
-                if (!is_string($value) && !is_numeric($value) && !is_bool($value)) {
-                    throw new CastingException('String value must be a string, a numeric or a boolean.');
-                }
-                return (string)$value;
-        }
     }
 }
