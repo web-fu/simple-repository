@@ -159,6 +159,7 @@ class DatabaseWrapper
         preg_match_all('/:\w+/', $query, $matches);
         $neededParams = $matches[0];
 
+        $this->formattedData = [];
         $missingData = [];
         $subQuery    = '';
         foreach ($neededParams as $param) {

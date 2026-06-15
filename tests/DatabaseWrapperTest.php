@@ -44,4 +44,16 @@ class DatabaseWrapperTest extends TestCase
             'expected' => "SELECT * FROM user WHERE id = :id_0",
         ];
     }
+
+    public function testMultipleQuery(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        $pdo = new \PDO('mysql:host=127.0.0.1;dbname='.$_ENV['DB_NAME'], $_ENV['DB_USER'], $_ENV['DB_PASS']);
+
+        $databaseWrapper = new DatabaseWrapper($pdo);
+        $databaseWrapper->query('SELECT * FROM user WHERE id = :id', ['id' => 1]);
+        $databaseWrapper->query('SELECT * FROM user WHERE username = :username', ['username' => 'foo']);
+
+    }
 }
