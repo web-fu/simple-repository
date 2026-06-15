@@ -160,8 +160,8 @@ class DatabaseWrapper
         $neededParams = $matches[0];
 
         $this->formattedData = [];
-        $missingData = [];
-        $subQuery    = '';
+        $missingData         = [];
+        $subQuery            = '';
         foreach ($neededParams as $param) {
             $pos = (int) strpos($query, $param);
             $subQuery .= substr($query, 0, $pos);
