@@ -21,20 +21,6 @@ use WebFu\SimpleRepository\DatabaseWrapper;
 class DatabaseWrapperTest extends TestCase
 {
     /**
-     * @covers ::getFormattedQuery
-     * @dataProvider queryProvider
-     */
-    public function testGetFormattedQuery(string $query, string $expected): void
-    {
-        $pdo = new \PDO('mysql:host=127.0.0.1;dbname='.$_ENV['DB_NAME'], $_ENV['DB_USER'], $_ENV['DB_PASS']);
-
-        $databaseWrapper = new DatabaseWrapper($pdo);
-        $databaseWrapper->query($query, ['id' => 1]);
-
-        $this->assertEquals($expected, $databaseWrapper->getFormattedQuery());
-    }
-
-    /**
      * @return iterable<string, array{query: string, expected: string}>
      */
     public function queryProvider(): iterable
