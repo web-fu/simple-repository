@@ -31,6 +31,9 @@ class DatabaseWrapperTest extends TestCase
         ];
     }
 
+    /**
+     * @covers ::query
+     */
     public function testMultipleQuery(): void
     {
         $this->expectNotToPerformAssertions();
