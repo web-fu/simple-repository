@@ -34,7 +34,7 @@ class DatabaseWrapper
     public function query(string $query, array $params = []): self
     {
         $formattedQuery = self::formatQuery($query);
-        $formattedData  = self::formatData($query, $params);
+        $formattedData  = self::formatData($formattedQuery, $params);
 
         $this->prepareQuery($formattedQuery)
             ->bindData($formattedData)
@@ -42,7 +42,7 @@ class DatabaseWrapper
 
         return $this;
     }
-    
+
     public static function formatQuery(string $query): string
     {
         preg_match_all('/:\w+/', $query, $matches);
@@ -57,6 +57,44 @@ class DatabaseWrapper
         }
 
         return $result . $query;
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     *
+     * @throws RepositoryException
+     * @return array<string, mixed>
+     */
+    public static function formatData(string $query, array $params = []): array
+    {
+        preg_match_all('/:\w+/', $query, $neededParams);
+        $neededParams = $neededParams[0];
+
+        $data = [];
+
+        // Add : if needed
+        /** @var string $key */
+        foreach ($params as $key => $value) {
+            if (':' !== $key[0]) {
+                $params[':'.$key] = $value;
+                unset($params[$key]);
+            }
+        }
+
+        // Create a data binding
+        foreach ($neededParams as $neededParam) {
+            /** @var string $key */
+            $key = preg_replace('/_\d+$/', '', $neededParam);
+            if (array_key_exists($key, $params)) {
+                $data[$neededParam] = $params[$key];
+            }
+        }
+
+        if ($missingData = array_diff($neededParams, array_keys($data))) {
+            throw new RepositoryException('Missing Data to complete query:'.PHP_EOL.print_r($missingData, true).' SQL:'.$query, 500);
+        }
+
+        return $data;
     }
 
     public function prepareQuery(string $query): self
@@ -79,8 +117,8 @@ class DatabaseWrapper
             $type = self::getPdoType($value);
             try {
                 $this->stmt->bindValue($key, $value, $type);
-            } catch (\PDOException $e) {
-                throw new RepositoryException('Bind Error: '.$e->getMessage(), $e->getCode(), $e);
+            } catch (\Exception $e) {
+                throw new RepositoryException('Bind Error: '.$e->getMessage().' for key: '.$key, $e->getCode(), $e);
             }
         }
 
@@ -202,44 +240,6 @@ class DatabaseWrapper
     public function lastId(): int
     {
         return (int) $this->connection->lastInsertId();
-    }
-
-    /**
-     * @param array<string, mixed> $params
-     *
-     * @throws RepositoryException
-     * @return array<string, mixed>
-     */
-    public static function formatData(string $query, array $params = []): array
-    {
-        preg_match_all('/:\w+/', $query, $neededParams);
-        $neededParams = $neededParams[0];
-
-        $data = [];
-
-        // Add : if needed
-        /** @var string $key */
-        foreach ($params as $key => $value) {
-            if (':' !== $key[0]) {
-                $params[':'.$key] = $value;
-                unset($params[$key]);
-            }
-        }
-
-        // Create a data binding
-        foreach ($neededParams as $neededParam) {
-            /** @var string $key */
-            $key = preg_replace('/_\d+$/', '', $neededParam);
-            if (array_key_exists($key, $params)) {
-                $data[$neededParam] = $params[$key];
-            }
-        }
-
-        if ($missingData = array_diff($neededParams, array_keys($data))) {
-            throw new RepositoryException('Missing Data to complete query:'.PHP_EOL.print_r($missingData, true).' SQL:'.$query, 500);
-        }
-
-        return $data;
     }
 
     /**
