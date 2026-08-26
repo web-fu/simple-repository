@@ -20,20 +20,6 @@ use WebFu\SimpleRepository\DatabaseWrapper;
  */
 class DatabaseWrapperTest extends TestCase
 {
-    /**
-     * @return iterable<string, array{query: string, expected: string}>
-     */
-    public function queryProvider(): iterable
-    {
-        yield 'select with where' => [
-            'query'    => 'SELECT * FROM user WHERE id = :id',
-            'expected' => "SELECT * FROM user WHERE id = :id_0",
-        ];
-    }
-
-    /**
-     * @covers ::query
-     */
     public function testMultipleQuery(): void
     {
         $this->expectNotToPerformAssertions();

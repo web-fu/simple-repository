@@ -51,6 +51,9 @@ abstract class Model implements \JsonSerializable
                 }
                 $value = $value->format($format);
             }
+            if (self::isEnumObject($value)) {
+                $value = self::normalizeEnumForSerialization($value);
+            }
             $result[$column->getName()] = $value;
             $property->setAccessible(false);
         }
@@ -176,6 +179,15 @@ abstract class Model implements \JsonSerializable
         }
 
         if ($column->getType() !== null) {
+            if ($column->getType() === Column::ENUM) {
+                $propertyType = $property->getType();
+                if ($propertyType instanceof \ReflectionNamedType && self::isEnumType($propertyType->getName())) {
+                    return self::castEnumToType($propertyType->getName(), $value);
+                }
+
+                throw new CastingException('Enum cast requires an enum-typed property.');
+            }
+
             return self::castValue($column->getType(), $value);
         }
 
@@ -193,6 +205,10 @@ abstract class Model implements \JsonSerializable
         }
 
         $typeName = $propertyType->getName();
+
+        if (self::isEnumType($typeName)) {
+            return self::castEnumToType($typeName, $value);
+        }
 
         switch ($typeName) {
             case 'int':
@@ -235,6 +251,73 @@ abstract class Model implements \JsonSerializable
                 return self::castValue(Column::DATETIME_IMMUTABLE, $value);
             default:
                 return $value;
+        }
+    }
+
+    /**
+     * @param mixed $value
+     * @return mixed
+     */
+    private static function normalizeEnumForSerialization($value)
+    {
+        $enumClass = get_class($value);
+        if (self::isBackedEnumType($enumClass)) {
+            return $value->value;
+        }
+
+        return $value->name;
+    }
+
+    /**
+     * @param mixed $value
+     */
+    private static function isEnumObject($value): bool
+    {
+        if (PHP_VERSION_ID < 80100 || !is_object($value) || !function_exists('enum_exists')) {
+            return false;
+        }
+
+        return enum_exists(get_class($value));
+    }
+
+    private static function isEnumType(string $typeName): bool
+    {
+        if (PHP_VERSION_ID < 80100 || !function_exists('enum_exists')) {
+            return false;
+        }
+
+        return enum_exists($typeName);
+    }
+
+    private static function isBackedEnumType(string $enumClass): bool
+    {
+        return PHP_VERSION_ID >= 80100
+            && interface_exists('BackedEnum')
+            && is_subclass_of($enumClass, \BackedEnum::class);
+    }
+
+    /**
+     * @param mixed $value
+     * @return mixed
+     */
+    private static function castEnumToType(string $enumClass, $value)
+    {
+        if ($value instanceof $enumClass) {
+            return $value;
+        }
+
+        if (!self::isBackedEnumType($enumClass)) {
+            throw new CastingException(sprintf('Enum "%s" is not backed. Only backed enums are supported for scalar values.', $enumClass));
+        }
+
+        if (!is_string($value) && !is_int($value)) {
+            throw new CastingException(sprintf('Enum "%s" expects a string or int backed value.', $enumClass));
+        }
+
+        try {
+            return call_user_func([$enumClass, 'from'], $value);
+        } catch (\Throwable $exception) {
+            throw new CastingException(sprintf('Invalid backed value for enum "%s".', $enumClass), 0, $exception);
         }
     }
 
