@@ -29,32 +29,6 @@ class DatabaseWrapperTest extends TestCase
         $databaseWrapper = new DatabaseWrapper($pdo);
         $databaseWrapper->query('SELECT * FROM user WHERE id = :id', ['id' => 1]);
         $databaseWrapper->query('SELECT * FROM user WHERE username = :username', ['username' => 'foo']);
-    }
 
-    public function testFormatQuery(): void
-    {
-        $query    = 'SELECT * FROM user WHERE id = :id AND username = :username AND email = :email AND id = :id';
-        $expected = 'SELECT * FROM user WHERE id = :id_0 AND username = :username_0 AND email = :email_0 AND id = :id_1';
-
-        $this->assertSame($expected, DatabaseWrapper::formatQuery($query));
-    }
-
-    public function testFormatData(): void
-    {
-        $query  = 'SELECT * FROM user WHERE id = :id_0 AND username = :username_0 AND email = :email_0 AND id = :id_1';
-        $params = [
-            'id'       => 1,
-            'username' => 'foo',
-            'email'    => 'john.doe@foo.com',
-        ];
-
-        $expected = [
-            ':id_0'       => 1,
-            ':username_0' => 'foo',
-            ':email_0'    => 'john.doe@foo.com',
-            ':id_1'       => 1,
-        ];
-
-        $this->assertSame($expected, DatabaseWrapper::formatData($query, $params));
     }
 }
