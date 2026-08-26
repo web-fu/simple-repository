@@ -15,6 +15,8 @@ namespace WebFu\SimpleRepository\Tests;
 use PHPUnit\Framework\TestCase;
 use WebFu\SimpleRepository\Column;
 use WebFu\SimpleRepository\Model;
+use WebFu\SimpleRepository\Tests\Enums\TestStatusBackedEnum;
+use WebFu\SimpleRepository\Tests\Enums\TestStatusEnum;
 
 /**
  * @coversDefaultClass \WebFu\SimpleRepository\Model
@@ -453,5 +455,113 @@ class ModelTest extends TestCase
         $this->assertFalse($user->isEnabled());
         $expectedCreatedAt = new \DateTime('2026-06-05T09:30:00+00:00');
         $this->assertEquals($expectedCreatedAt, $user->getCreatedAt());
+    }
+
+    public function testEnumAutoTypeCastingWithAttributes(): void
+    {
+        if (PHP_VERSION_ID < 80100) {
+            $this->markTestSkipped('Enums are supported since PHP 8.1');
+        }
+
+        $userClass = new class extends Model {
+            #[Column(name: 'status')]
+            protected TestStatusEnum $status;
+
+            public function getStatus(): TestStatusEnum
+            {
+                return $this->status;
+            }
+        };
+
+        $user = new $userClass([
+            'status' => 'RUNNING',
+        ]);
+
+        $this->assertSame(TestStatusEnum::RUNNING, $user->getStatus());
+        $this->assertSame([
+            'status' => 'RUNNING',
+        ], $user->jsonSerialize());
+    }
+
+    public function testEnumTypeCastingWithAnnotations(): void
+    {
+        if (PHP_VERSION_ID < 80100) {
+            $this->markTestSkipped('Enums are supported since PHP 8.1');
+        }
+
+        $userClass = new class extends Model {
+            /**
+             * @column(name="status", type="enum")
+             */
+            protected TestStatusEnum $status;
+
+            public function getStatus(): TestStatusEnum
+            {
+                return $this->status;
+            }
+        };
+
+        $user = new $userClass([
+            'status' => 'RUNNING',
+        ]);
+
+        $this->assertSame(TestStatusEnum::RUNNING, $user->getStatus());
+        $this->assertSame([
+            'status' => 'RUNNING',
+        ], $user->jsonSerialize());
+    }
+
+    public function testBackedEnumAutoTypeCastingWithAttributes(): void
+    {
+        if (PHP_VERSION_ID < 80100) {
+            $this->markTestSkipped('Enums are supported since PHP 8.1');
+        }
+
+        $userClass = new class extends Model {
+            #[Column(name: 'status')]
+            protected TestStatusBackedEnum $status;
+
+            public function getStatus(): TestStatusBackedEnum
+            {
+                return $this->status;
+            }
+        };
+
+        $user = new $userClass([
+            'status' => 'RUNNING',
+        ]);
+
+        $this->assertSame(TestStatusBackedEnum::RUNNING, $user->getStatus());
+        $this->assertSame([
+            'status' => 'RUNNING',
+        ], $user->jsonSerialize());
+    }
+
+    public function testBackedEnumTypeCastingWithAnnotations(): void
+    {
+        if (PHP_VERSION_ID < 80100) {
+            $this->markTestSkipped('Enums are supported since PHP 8.1');
+        }
+
+        $userClass = new class extends Model {
+            /**
+             * @column(name="status", type="enum")
+             */
+            protected TestStatusBackedEnum $status;
+
+            public function getStatus(): TestStatusBackedEnum
+            {
+                return $this->status;
+            }
+        };
+
+        $user = new $userClass([
+            'status' => 'RUNNING',
+        ]);
+
+        $this->assertSame(TestStatusBackedEnum::RUNNING, $user->getStatus());
+        $this->assertSame([
+            'status' => 'RUNNING',
+        ], $user->jsonSerialize());
     }
 }

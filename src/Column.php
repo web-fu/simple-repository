@@ -11,7 +11,6 @@ declare(strict_types=1);
  */
 
 namespace WebFu\SimpleRepository;
-use WebFu\SimpleRepository\Exception\CastingException;
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Column
@@ -22,6 +21,7 @@ class Column
     public const FLOAT              = 'float';
     public const BOOLEAN            = 'boolean';
     public const JSON               = 'json';
+    public const ENUM               = 'enum';
     public const DATETIME           = 'datetime';
     public const DATETIME_IMMUTABLE = 'datetime_immutable';
 
