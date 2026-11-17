@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace WebFu\SimpleRepository\Tests\Enums;
 
-enum TestStatusBackedEnum: string
+enum TestStatusBackedStringEnum: string
 {
     case RUNNING = 'running';
 }

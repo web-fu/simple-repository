@@ -66,7 +66,16 @@ class QueryBuilder
             if (!array_key_exists($param, $data)) {
                 continue;
             }
-            $formattedData[$neededParam] = $data[$param];
+
+            $value = $data[$param];
+
+            if (is_object($value)
+                && PHP_VERSION_ID >= 80100
+                && $value instanceof \BackedEnum) {
+                $value = $value->value;
+            }
+
+            $formattedData[$neededParam] = $value;
         }
 
         if ($missingData = array_diff(array_keys($neededParams), array_keys($formattedData))) {

@@ -126,6 +126,7 @@ abstract class Model implements \JsonSerializable
             // if running on PHP 8+ handle attributes
             if (defined('PHP_VERSION_ID') && PHP_VERSION_ID >= 80000) {
                 $attributes         = $property->getAttributes();
+                /** @var \ReflectionAttribute[] $columnsByAttribute */
                 $columnsByAttribute = array_filter($attributes, function($attribute) {
                     return $attribute->getName() === Column::class;
                 });

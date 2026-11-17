@@ -15,7 +15,8 @@ namespace WebFu\SimpleRepository\Tests;
 use PHPUnit\Framework\TestCase;
 use WebFu\SimpleRepository\Column;
 use WebFu\SimpleRepository\Model;
-use WebFu\SimpleRepository\Tests\Enums\TestStatusBackedEnum;
+use WebFu\SimpleRepository\Tests\Enums\TestStatusBackedIntEnum;
+use WebFu\SimpleRepository\Tests\Enums\TestStatusBackedStringEnum;
 use WebFu\SimpleRepository\Tests\Enums\TestStatusEnum;
 
 /**
@@ -518,12 +519,20 @@ class ModelTest extends TestCase
         }
 
         $userClass = new class extends Model {
-            #[Column(name: 'status')]
-            protected TestStatusBackedEnum $status;
+            #[Column(name: 'string_status')]
+            protected TestStatusBackedStringEnum $stringEnum;
 
-            public function getStatus(): TestStatusBackedEnum
+            #[Column(name: 'int_status')]
+            protected TestStatusBackedIntEnum $intEnum;
+
+            public function getStringEnum(): TestStatusBackedStringEnum
             {
-                return $this->status;
+                return $this->stringEnum;
+            }
+
+            public function getIntEnum(): TestStatusBackedIntEnum
+            {
+                return $this->intEnum;
             }
         };
 
@@ -531,9 +540,14 @@ class ModelTest extends TestCase
             'status' => 'RUNNING',
         ]);
 
-        $this->assertSame(TestStatusBackedEnum::RUNNING, $user->getStatus());
+        $this->assertSame(TestStatusBackedStringEnum::RUNNING, $user->getStringEnum());
         $this->assertSame([
-            'status' => 'RUNNING',
+            'string_status' => 'RUNNING',
+        ], $user->jsonSerialize());
+
+        $this->assertSame(TestStatusBackedIntEnum::ACTIVE, $user->getIntEnum());
+        $this->assertSame([
+            'int_status' => 1,
         ], $user->jsonSerialize());
     }
 
@@ -547,9 +561,9 @@ class ModelTest extends TestCase
             /**
              * @column(name="status", type="enum")
              */
-            protected TestStatusBackedEnum $status;
+            protected TestStatusBackedStringEnum $status;
 
-            public function getStatus(): TestStatusBackedEnum
+            public function getStatus(): TestStatusBackedStringEnum
             {
                 return $this->status;
             }
@@ -559,7 +573,7 @@ class ModelTest extends TestCase
             'status' => 'RUNNING',
         ]);
 
-        $this->assertSame(TestStatusBackedEnum::RUNNING, $user->getStatus());
+        $this->assertSame(TestStatusBackedStringEnum::RUNNING, $user->getStatus());
         $this->assertSame([
             'status' => 'RUNNING',
         ], $user->jsonSerialize());
